@@ -13,7 +13,7 @@ function formatIsoDateString(isoDate: string): string {
 type CalendarSlotDetailsProps = {
     onClose: () => void;
     event?: CalendarEntryExtDto;
-    onDelete: (id: number, email: string) => void;
+    onDelete: (id: number, email: string, isSeries?: boolean) => void;
 };
 
 function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsProps) {
@@ -56,6 +56,10 @@ function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsPr
                             </div>
                         </h2>
 
+                        {event.SeriesId && (
+                            <div className="mb-2">{t("calendar.page.part-of-series")}</div>
+                        )}
+
                         <div className="text-gray-700">
                             <div>
                                 {event.FirstName} {event.LastName ?? ""}
@@ -64,7 +68,7 @@ function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsPr
                         </div>
 
                         {event.endDate.getTime() < new Date().getTime() ? null : (
-                            <div className="mt-4 flex gap-2 opacity-50 focus-within:opacity-100">
+                            <div className="mt-4 flex flex-col gap-2 opacity-50 focus-within:opacity-100">
                                 <input
                                     type="text"
                                     value={inputValue}
@@ -72,17 +76,34 @@ function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsPr
                                     className="flex-1 border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                     placeholder={t("calendar.page.email-placeholder")}
                                 />
-                                <button
-                                    onClick={() => onDelete(event.Id, inputValue)}
-                                    className="cursor-pointer bg-red-500 px-4 py-2 text-white hover:bg-red-600 active:bg-red-700"
-                                >
-                                    <Trash
-                                        className="mr-1 inline align-text-bottom"
-                                        height="20"
-                                        width="20"
-                                    />
-                                    {t("calendar.page.delete")}
-                                </button>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => onDelete(event.Id, inputValue)}
+                                        className="flex-1 cursor-pointer bg-red-500 px-4 py-2 text-white hover:bg-red-600 active:bg-red-700"
+                                    >
+                                        <Trash
+                                            className="mr-1 inline align-text-bottom"
+                                            height="20"
+                                            width="20"
+                                        />
+                                        {t("calendar.page.delete")}
+                                    </button>
+                                    {event.SeriesId && (
+                                        <button
+                                            onClick={() =>
+                                                onDelete(event!.SeriesId!, inputValue, true)
+                                            }
+                                            className="flex-1 cursor-pointer bg-red-500 px-4 py-2 text-white hover:bg-red-600 active:bg-red-700"
+                                        >
+                                            <Trash
+                                                className="mr-1 inline align-text-bottom"
+                                                height="20"
+                                                width="20"
+                                            />
+                                            {t("calendar.page.delete-series")}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </motion.div>

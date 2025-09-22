@@ -21,7 +21,9 @@
             "from": "Von",
             "to": "Bis",
             "email-placeholder": "Email eingeben",
-            "delete": "Löschen"
+            "delete": "Löschen",
+            "part-of-series": "Teil einer Serie",
+            "delete-series": "Serie löschen"
         },
         "modal-new": {
             "heading": "Neuer Eintrag",
@@ -30,6 +32,11 @@
             "email": "E-Mail",
             "startdate": "Start-Zeitpunkt",
             "enddate": "End-Zeitpunkt",
+            "series": "Serie",
+            "recurrence": "Häufigkeit",
+            "recurrence-weekly": "wöchentlich",
+            "recurrence-monthly": "monatlich",
+            "repetitions": "Wiederholungen",
             "submit": "Eintragen",
             "error-past": "Start-Zeitpunkt muss in der Zukunft liegen",
             "error-order": "Start- muss vor End-Zeitpunkt liegen",
@@ -38,8 +45,15 @@
         "context": {
             "error-getAllCalendarEntries": "Kalender-Daten konnten nicht abgefragt werden",
             "error-postCalendarEntry": "Kalender-Eintrag konnte nicht angelegt werden",
+            "error-postCalendarEntry-conflict": "Kalender-Eintrag konnte nicht angelegt werden aufgrund von überlappenden Zeiträumen",
             "error-deleteCalendarEntry": "Kalender-Eintrag konnte nicht gelöscht werden",
-            "success-postCalendarEntry": "Kalender-Eintrag wurde erfolgreich angelegt"
+            "success-postCalendarEntry": "Kalender-Eintrag wurde erfolgreich angelegt",
+            "success-deleteCalendarEntry": "Kalender-Eintrag wurde erfolgreich gelöscht",
+            "error-postCalendarSeries": "Kalender-Serie konnte nicht angelegt werden",
+            "error-postCalendarSeries-conflict": "Kalender-Serie konnte nicht angelegt werden aufgrund von überlappenden Zeiträumen",
+            "error-deleteCalendarSeries": "Kalender-Serie konnte nicht gelöscht werden",
+            "success-postCalendarSeries": "Kalender-Serie wurde erfolgreich angelegt",
+            "success-deleteCalendarSeries": "Kalender-Serie wurde erfolgreich gelöscht"
         }
     },
     "login": {
@@ -70,6 +84,8 @@
         "location": "???",
         "calendar-q": "Was zeigt der Kalender an?",
         "calendar": "Der Kalender zeigt die Timeslots an, zu denen sich eine Person zum Gebet bereit erklärt hat und sich dementsprechend eingetragen hat.",
+        "colors-q": "Was bedeuten die unterschiedlichen Farben im Kalender?",
+        "colors": "Blau steht für einen einzelnen Termin, während Orange eine Serie signalisiert.",
         "account-q": "Brauche ich einen Account, um mich eintragen zu können",
         "account": "Nein, du benötigst keinen Account um dich einzutragen. Du musst lediglich Vornamen, Nachnamen und eine Email angeben. Die Email dient hierbei lediglich der Kontaktaufnahme, falls notwendig, aber wird im Regelfall nicht benötigt.",
         "data-security-q": "Sind meine Daten öffentlich einsehbar?",

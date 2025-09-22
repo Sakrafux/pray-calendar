@@ -71,7 +71,7 @@ func (h *ApiHandler) PostEntry(w http.ResponseWriter, r *http.Request) {
 
 	insertEntry, err := h.db.InsertEntry(entry)
 	if err != nil {
-		if err.Error() == "No entry inserted" {
+		if err.Error() == "no entry inserted" {
 			http.Error(w, err.Error(), http.StatusConflict)
 			return
 		}
@@ -80,6 +80,70 @@ func (h *ApiHandler) PostEntry(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJson(w, insertEntry)
+	w.WriteHeader(http.StatusCreated)
+}
+
+func (h *ApiHandler) PostSeries(w http.ResponseWriter, r *http.Request) {
+	var seriesReq SeriesRequest
+	err := json.NewDecoder(r.Body).Decode(&seriesReq)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if seriesReq.Entry.Start.Before(time.Now()) {
+		http.Error(w, "Start time must be in the future", http.StatusBadRequest)
+		return
+	}
+
+	if !seriesReq.Entry.Start.Before(seriesReq.Entry.End) {
+		http.Error(w, "Start must be before End", http.StatusBadRequest)
+		return
+	}
+
+	if seriesReq.Entry.End.Sub(seriesReq.Entry.Start).Hours() > 24 {
+		http.Error(w, "Duration may not be too long", http.StatusBadRequest)
+		return
+	}
+
+	entries := []CalendarEntryFull{seriesReq.Entry}
+	for range seriesReq.Series.Repetitions - 1 {
+		nextEntry := entries[len(entries)-1]
+		if seriesReq.Series.Interval == "weekly" {
+			nextEntry.Start = nextEntry.Start.AddDate(0, 0, 7)
+			nextEntry.End = nextEntry.End.AddDate(0, 0, 7)
+		} else if seriesReq.Series.Interval == "monthly" {
+			nextEntry.Start = nextEntry.Start.AddDate(0, 1, 0)
+			nextEntry.End = nextEntry.End.AddDate(0, 1, 0)
+		} else {
+			http.Error(w, "Invalid interval", http.StatusBadRequest)
+			return
+		}
+		entries = append(entries, nextEntry)
+	}
+
+	if err := h.db.CheckMultipleTimeslots(entries); err != nil {
+		http.Error(w, err.Error(), http.StatusConflict)
+		return
+	}
+
+	series, err := h.db.InsertSeries(seriesReq.Series)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	insertedEntries := make([]*CalendarEntry, len(entries))
+	for i, entry := range entries {
+		entry.SeriesId = &series.Id
+		insertedEntries[i], err = h.db.InsertEntry(entry)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	writeJson(w, insertedEntries)
 	w.WriteHeader(http.StatusCreated)
 }
 
@@ -98,7 +162,32 @@ func (h *ApiHandler) DeleteEntry(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		if err.Error() == "No entry deleted" {
+		if err.Error() == "no entry deleted" {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *ApiHandler) DeleteSeries(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if isAdmin(r) {
+		err = h.db.DeleteSeriesAdmin(id)
+	} else {
+		email := r.URL.Query().Get("email")
+		err = h.db.DeleteSeries(id, email)
+	}
+
+	if err != nil {
+		if err.Error() == "no entry deleted" {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}

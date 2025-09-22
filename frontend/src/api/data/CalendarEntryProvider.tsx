@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import {
     createContext,
     type PropsWithChildren,
@@ -10,13 +11,22 @@ import { useTranslation } from "react-i18next";
 
 import { useApi } from "@/api/ApiProvider";
 import { useToast } from "@/components/Toast/ToastProvider";
-import type { ApiData, CalendarEntryDto, CalendarEntryExtDto, ContextAction } from "@/types";
+import type {
+    ApiData,
+    CalendarEntryDto,
+    CalendarEntryExtDto,
+    ContextAction,
+    Series,
+} from "@/types";
+import { startOfWeek } from "@/util/date";
 
 enum CalendarEntryActions {
     GET_START = "GET_START",
     GET_SUCCESS = "GET_SUCCESS",
     POST_SUCCESS = "POST_SUCCESS",
+    POST_SERIES_SUCCESS = "POST_SERIES_SUCCESS",
     DELETE_SUCCESS = "DELETE_SUCCESS",
+    DELETE_SERIES_SUCCESS = "DELETE_SERIES_SUCCESS",
     QUERY_ERROR = "QUERY_ERROR",
     CLEAR_ERROR = "CLEAR_ERROR",
 }
@@ -27,7 +37,7 @@ type CalendarEntryState = ApiData<Record<string, CalendarEntryData>>;
 function calendarEntryReducer(
     state: CalendarEntryState,
     action: ContextAction<
-        [string, CalendarEntryData] | [string, CalendarEntryExtDto],
+        [string, CalendarEntryData] | CalendarEntryExtDto | [string, CalendarEntryExtDto][],
         CalendarEntryActions
     >,
 ): CalendarEntryState {
@@ -47,15 +57,34 @@ function calendarEntryReducer(
             if (state.data == null) {
                 return state;
             }
-            const data = action.payload as [string, CalendarEntryExtDto];
+            const data = action.payload as CalendarEntryExtDto;
+            const date = action.params!.date as string;
             return {
                 ...state,
                 data: {
                     ...state.data,
-                    [data[0]]: { ...state.data[data[0]], [data[1].Id]: data[1] },
+                    [date]: { ...state.data[date], [data.Id]: data },
                 },
                 error: undefined,
             };
+        }
+        case CalendarEntryActions.POST_SERIES_SUCCESS: {
+            if (state.data == null) {
+                return state;
+            }
+            const data = action.payload as [string, CalendarEntryExtDto][];
+            const newState = { ...state, error: undefined };
+
+            data.forEach(([date, dto]) => {
+                if (state.data![date] != null) {
+                    newState.data = {
+                        ...newState.data,
+                        [date]: { ...state.data![date], [dto.Id]: dto },
+                    };
+                }
+            });
+
+            return newState;
         }
         case CalendarEntryActions.DELETE_SUCCESS: {
             if (state.data == null) {
@@ -67,6 +96,25 @@ function calendarEntryReducer(
             return {
                 ...state,
                 data: { ...state.data, [date]: newState },
+                error: undefined,
+            };
+        }
+        case CalendarEntryActions.DELETE_SERIES_SUCCESS: {
+            if (state.data == null) {
+                return state;
+            }
+            const { id: seriesId } = action.params!;
+
+            const newStateData = { ...state.data };
+            Object.entries(state.data).forEach(([date, part]) => {
+                newStateData[date] = Object.fromEntries(
+                    Object.entries(part).filter(([, dto]) => dto.SeriesId != seriesId),
+                );
+            });
+
+            return {
+                ...state,
+                data: newStateData,
                 error: undefined,
             };
         }
@@ -87,7 +135,9 @@ type CalendarEntryContextType = {
     state: CalendarEntryState;
     getAllCalendarEntries: (date: string) => Promise<void>;
     postCalendarEntry: (entry: CalendarEntryDto, date: string) => Promise<boolean>;
+    postCalendarSeries: (entry: CalendarEntryDto, series: Series) => Promise<boolean>;
     deleteCalendarEntry: (id: number, email: string, date: string) => Promise<void>;
+    deleteCalendarSeries: (id: number, email: string) => Promise<void>;
     clearError: () => void;
 };
 
@@ -119,6 +169,12 @@ export function CalendarEntryProvider({ children }: PropsWithChildren) {
                         Object.fromEntries(data.map((dto) => [dto.Id, mapDtoToExtDto(dto)])),
                     ],
                 });
+                console.log(
+                    data.map((dto) => [
+                        mapDtoToExtDto(dto),
+                        startOfWeek(mapDtoToExtDto(dto).startDate).toISOString(),
+                    ]),
+                );
             } catch (err) {
                 dispatch({ type: CalendarEntryActions.QUERY_ERROR, error: err });
                 showToast("error", t("calendar.context.error-getAllCalendarEntries"));
@@ -135,13 +191,49 @@ export function CalendarEntryProvider({ children }: PropsWithChildren) {
                     .then((res) => res.data);
                 dispatch({
                     type: CalendarEntryActions.POST_SUCCESS,
-                    payload: [date, mapDtoToExtDto(data)],
+                    payload: mapDtoToExtDto(data),
+                    params: { date },
                 });
                 showToast("success", t("calendar.context.success-postCalendarEntry"), 5000);
                 return true;
             } catch (err) {
                 dispatch({ type: CalendarEntryActions.QUERY_ERROR, error: err });
-                showToast("error", t("calendar.context.error-postCalendarEntry"));
+                if (err instanceof AxiosError && err.status === 409) {
+                    showToast("error", t("calendar.context.error-postCalendarEntry-conflict"));
+                } else {
+                    showToast("error", t("calendar.context.error-postCalendarEntry"));
+                }
+                return false;
+            }
+        },
+        [api, showToast, t],
+    );
+
+    const postCalendarSeries = useCallback(
+        async (entry: CalendarEntryDto, series: Series) => {
+            try {
+                const data = await api
+                    .post<CalendarEntryDto[]>("/calendar/series", { Entry: entry, Series: series })
+                    .then((res) => res.data);
+                dispatch({
+                    type: CalendarEntryActions.POST_SERIES_SUCCESS,
+                    payload: data.map((dto) => {
+                        const extDto = mapDtoToExtDto(dto);
+                        return [
+                            startOfWeek(extDto.startDate).toISOString().split("T")[0],
+                            extDto,
+                        ] as [string, CalendarEntryExtDto];
+                    }),
+                });
+                showToast("success", t("calendar.context.success-postCalendarSeries"), 5000);
+                return true;
+            } catch (err) {
+                dispatch({ type: CalendarEntryActions.QUERY_ERROR, error: err });
+                if (err instanceof AxiosError && err.status === 409) {
+                    showToast("error", t("calendar.context.error-postCalendarSeries-conflict"));
+                } else {
+                    showToast("error", t("calendar.context.error-postCalendarSeries"));
+                }
                 return false;
             }
         },
@@ -158,9 +250,29 @@ export function CalendarEntryProvider({ children }: PropsWithChildren) {
                     type: CalendarEntryActions.DELETE_SUCCESS,
                     params: { id, date },
                 });
+                showToast("success", t("calendar.context.success-deleteCalendarEntry"), 5000);
             } catch (err) {
                 dispatch({ type: CalendarEntryActions.QUERY_ERROR, error: err });
                 showToast("error", t("calendar.context.error-deleteCalendarEntry"));
+            }
+        },
+        [api, showToast, t],
+    );
+
+    const deleteCalendarSeries = useCallback(
+        async (id: number, email: string) => {
+            try {
+                await api
+                    .delete(`/calendar/series/${id}`, { params: { email } })
+                    .then((res) => res.data);
+                dispatch({
+                    type: CalendarEntryActions.DELETE_SERIES_SUCCESS,
+                    params: { id },
+                });
+                showToast("success", t("calendar.context.success-deleteCalendarSeries"), 5000);
+            } catch (err) {
+                dispatch({ type: CalendarEntryActions.QUERY_ERROR, error: err });
+                showToast("error", t("calendar.context.error-deleteCalendarSeries"));
             }
         },
         [api, showToast, t],
@@ -173,10 +285,20 @@ export function CalendarEntryProvider({ children }: PropsWithChildren) {
             state,
             getAllCalendarEntries,
             postCalendarEntry,
+            postCalendarSeries,
             deleteCalendarEntry,
+            deleteCalendarSeries,
             clearError,
         }),
-        [clearError, getAllCalendarEntries, deleteCalendarEntry, postCalendarEntry, state],
+        [
+            state,
+            getAllCalendarEntries,
+            postCalendarEntry,
+            postCalendarSeries,
+            deleteCalendarEntry,
+            deleteCalendarSeries,
+            clearError,
+        ],
     );
 
     return <CalendarEntryContext.Provider value={value}>{children}</CalendarEntryContext.Provider>;

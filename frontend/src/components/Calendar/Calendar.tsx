@@ -7,21 +7,7 @@ import { useApiCalendarEntry } from "@/api/data/CalendarEntryProvider";
 import CalendarSlotNew from "@/components/Calendar/CalendarSlotNew";
 import CalendarSlots from "@/components/Calendar/CalendarSlots";
 import { useLoading } from "@/components/LoadingProvider";
-
-function startOfWeek(date: Date): Date {
-    const d = new Date(date);
-    const day = d.getDay(); // 0 = Sunday
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust if Sunday
-    d.setDate(diff);
-    d.setHours(d.getTimezoneOffset() / -60, 0, 0, 0);
-    return d;
-}
-
-function addDays(date: Date, days: number): Date {
-    const d = new Date(date);
-    d.setDate(d.getDate() + days);
-    return d;
-}
+import { addDays, startOfWeek } from "@/util/date";
 
 const variants = {
     enter: (direction: number) => ({
@@ -40,7 +26,8 @@ export default function WeeklyCalendar() {
     const [direction, setDirection] = useState(0); // 1 = next, -1 = prev
     const [newEntryModal, setNewEntryModal] = useState(false);
 
-    const { state, getAllCalendarEntries, postCalendarEntry } = useApiCalendarEntry();
+    const { state, getAllCalendarEntries, postCalendarEntry, postCalendarSeries } =
+        useApiCalendarEntry();
     const { showLoading, hideLoading } = useLoading();
     const { t } = useTranslation();
 
@@ -154,9 +141,17 @@ export default function WeeklyCalendar() {
             <CalendarSlotNew
                 open={newEntryModal}
                 onClose={() => setNewEntryModal(false)}
-                onSubmit={async (dto) => {
+                onSubmit={async (entry, series) => {
+                    if (series != null) {
+                        if (await postCalendarSeries(entry, series)) {
+                            setNewEntryModal(false);
+                            return true;
+                        }
+                        return false;
+                    }
+
                     if (
-                        await postCalendarEntry(dto, currentWeekStart.toISOString().split("T")[0])
+                        await postCalendarEntry(entry, currentWeekStart.toISOString().split("T")[0])
                     ) {
                         setNewEntryModal(false);
                         return true;

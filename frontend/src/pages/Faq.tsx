@@ -13,6 +13,8 @@ function Faq() {
             <p>{t("faq.location")}</p>
             <h2 className="text-l mt-2 font-semibold">{t("faq.calendar-q")}</h2>
             <p>{t("faq.calendar")}</p>
+            <h2 className="text-l mt-2 font-semibold">{t("faq.colors-q")}</h2>
+            <p>{t("faq.colors")}</p>
             <h2 className="text-l mt-2 font-semibold">{t("faq.creation-q")}</h2>
             <p>{t("faq.creation")}</p>
             <h2 className="text-l mt-2 font-semibold">{t("faq.account-q")}</h2>

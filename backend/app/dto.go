@@ -7,6 +7,7 @@ type CalendarEntry struct {
 	FirstName string
 	Start     time.Time
 	End       time.Time
+	SeriesId  *int
 }
 
 type CalendarEntryFull struct {
@@ -15,4 +16,13 @@ type CalendarEntryFull struct {
 	Email    string
 }
 
-// TODO series
+type Series struct {
+	Id          int
+	Interval    string
+	Repetitions int
+}
+
+type SeriesRequest struct {
+	Series Series
+	Entry  CalendarEntryFull
+}

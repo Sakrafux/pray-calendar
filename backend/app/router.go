@@ -18,6 +18,11 @@ func CreateRouter(db *DBHandler, admin *security.AdminData) http.Handler {
 	router.HandleFunc("DELETE /calendar/entries/{id}", apiHandler.DeleteEntry)
 	router.HandleFunc("OPTIONS /calendar/entries/{id}", nullHandler)
 
+	router.HandleFunc("POST /calendar/series", apiHandler.PostSeries)
+	router.HandleFunc("OPTIONS /calendar/series", nullHandler)
+	router.HandleFunc("DELETE /calendar/series/{id}", apiHandler.DeleteSeries)
+	router.HandleFunc("OPTIONS /calendar/series/{id}", nullHandler)
+
 	router.HandleFunc("POST /admin/login", apiHandler.Login)
 	router.HandleFunc("OPTIONS /admin/login", nullHandler)
 	router.HandleFunc("GET /admin/token", apiHandler.RefreshToken)

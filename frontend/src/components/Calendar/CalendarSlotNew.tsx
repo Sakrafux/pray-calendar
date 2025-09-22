@@ -3,12 +3,12 @@ import { X } from "lucide-react";
 import { type ChangeEvent, type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { CalendarEntryDto } from "@/types";
+import type { CalendarEntryDto, Series } from "@/types";
 
 type CalendarSlotNewProps = {
     open: boolean;
     onClose: () => void;
-    onSubmit: (event: CalendarEntryDto) => Promise<boolean>;
+    onSubmit: (entry: CalendarEntryDto, series?: Series) => Promise<boolean>;
 };
 
 function CalendarSlotNew({ open, onClose, onSubmit }: CalendarSlotNewProps) {
@@ -22,6 +22,10 @@ function CalendarSlotNew({ open, onClose, onSubmit }: CalendarSlotNewProps) {
         endDate: "",
         endHour: "0",
         endMinute: "0",
+        series: false,
+        // "weekly" | "monthly"
+        recurrence: "weekly",
+        repetitions: 1,
     });
     const [error, setError] = useState("");
 
@@ -31,8 +35,11 @@ function CalendarSlotNew({ open, onClose, onSubmit }: CalendarSlotNewProps) {
     const { t } = useTranslation();
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        const { name, type, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: type === "checkbox" ? e.target.checked : value,
+        }));
     };
 
     const handleSubmit = async (e: FormEvent) => {
@@ -70,8 +77,15 @@ function CalendarSlotNew({ open, onClose, onSubmit }: CalendarSlotNewProps) {
             Email: formData.email,
             Start: new Date(start.getTime() - start.getTimezoneOffset() * 60 * 1000).toISOString(),
             End: new Date(end.getTime() - end.getTimezoneOffset() * 60 * 1000).toISOString(),
+            SeriesId: -1,
         };
-        if (await onSubmit(dto)) {
+        const series: Series | undefined = formData.series
+            ? {
+                  Interval: formData.recurrence,
+                  Repetitions: Number(formData.repetitions),
+              }
+            : undefined;
+        if (await onSubmit(dto, series)) {
             setFormData({
                 firstName: formData.firstName,
                 lastName: formData.lastName,
@@ -82,6 +96,9 @@ function CalendarSlotNew({ open, onClose, onSubmit }: CalendarSlotNewProps) {
                 endDate: "",
                 endHour: "0",
                 endMinute: "0",
+                series: false,
+                recurrence: "weekly",
+                repetitions: 1,
             });
             setError("");
         }
@@ -122,7 +139,7 @@ function CalendarSlotNew({ open, onClose, onSubmit }: CalendarSlotNewProps) {
                                 name="firstName"
                                 value={formData.firstName}
                                 onChange={handleChange}
-                                className="w-full border p-2 focus:ring-2 focus:ring-blue-500"
+                                className="mt-1 w-full border p-2 focus:ring-2 focus:ring-blue-500"
                                 required
                             />
                         </div>
@@ -136,7 +153,7 @@ function CalendarSlotNew({ open, onClose, onSubmit }: CalendarSlotNewProps) {
                                 name="lastName"
                                 value={formData.lastName}
                                 onChange={handleChange}
-                                className="w-full border p-2 focus:ring-2 focus:ring-blue-500"
+                                className="mt-1 w-full border p-2 focus:ring-2 focus:ring-blue-500"
                                 required
                             />
                         </div>
@@ -150,7 +167,7 @@ function CalendarSlotNew({ open, onClose, onSubmit }: CalendarSlotNewProps) {
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="w-full border p-2 focus:ring-2 focus:ring-blue-500"
+                                className="mt-1 w-full border p-2 focus:ring-2 focus:ring-blue-500"
                                 required
                             />
                         </div>
@@ -235,6 +252,68 @@ function CalendarSlotNew({ open, onClose, onSubmit }: CalendarSlotNewProps) {
                                     ))}
                                 </select>
                             </div>
+                        </div>
+
+                        <div className="mt-3">
+                            <label className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    name="series"
+                                    checked={formData.series}
+                                    onChange={handleChange}
+                                    className="rounded"
+                                />
+                                <span className="font-medium">
+                                    {t("calendar.modal-new.series")}
+                                </span>
+                            </label>
+
+                            {formData.series && (
+                                <div className="my-1 space-y-1">
+                                    <div>
+                                        <label className="block text-sm font-medium">
+                                            {t("calendar.modal-new.recurrence")}
+                                        </label>
+                                        <div className="mt-1 flex gap-4">
+                                            <label className="flex items-center gap-2">
+                                                <input
+                                                    type="radio"
+                                                    name="recurrence"
+                                                    value="weekly"
+                                                    checked={formData.recurrence === "weekly"}
+                                                    onChange={handleChange}
+                                                />
+                                                {t("calendar.modal-new.recurrence-weekly")}
+                                            </label>
+                                            <label className="flex items-center gap-2">
+                                                <input
+                                                    type="radio"
+                                                    name="recurrence"
+                                                    value="monthly"
+                                                    checked={formData.recurrence === "monthly"}
+                                                    onChange={handleChange}
+                                                />
+                                                {t("calendar.modal-new.recurrence-monthly")}
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium">
+                                            {t("calendar.modal-new.repetitions")}
+                                        </label>
+                                        <input
+                                            type="number"
+                                            name="repetitions"
+                                            value={formData.repetitions}
+                                            onChange={handleChange}
+                                            min={1}
+                                            max={100}
+                                            className="mt-1 w-24 border p-2"
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <button

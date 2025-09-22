@@ -22,7 +22,7 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
     const [events, setEvents] = useState<CalendarEntryExtDto[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<CalendarEntryExtDto>();
 
-    const { state, deleteCalendarEntry } = useApiCalendarEntry();
+    const { state, deleteCalendarEntry, deleteCalendarSeries } = useApiCalendarEntry();
     const { showLoading, hideLoading } = useLoading();
 
     useEffect(() => {
@@ -81,10 +81,14 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
 
                         let eventDiv = null;
                         if (event) {
+                            const color =
+                                event.SeriesId != null
+                                    ? "bg-orange-500 hover:bg-orange-600 active:bg-orange-700"
+                                    : "bg-blue-500 hover:bg-blue-600 active:bg-blue-700";
                             if (event.slots === 1) {
                                 eventDiv = (
                                     <div
-                                        className="absolute inset-1 z-10 flex cursor-pointer items-center bg-blue-500 p-2 text-xs text-white shadow hover:bg-blue-600 active:bg-blue-700"
+                                        className={`absolute inset-1 z-10 flex cursor-pointer items-center p-2 text-xs text-white shadow ${color}`}
                                         style={{ height: `${event.slots * 2.5 - 0.5}rem` }}
                                         onClick={() => setSelectedEvent(event)}
                                     >
@@ -100,7 +104,7 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
                             } else {
                                 eventDiv = (
                                     <div
-                                        className="absolute inset-1 z-10 flex cursor-pointer flex-col bg-blue-500 p-2 text-xs text-white shadow hover:bg-blue-600 active:bg-blue-700"
+                                        className={`absolute inset-1 z-10 flex cursor-pointer flex-col p-2 text-xs text-white shadow ${color}`}
                                         style={{ height: `${event.slots * 2.5 - 0.5}rem` }}
                                         onClick={() => setSelectedEvent(event)}
                                     >
@@ -132,9 +136,17 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
             <CalendarSlotDetails
                 event={selectedEvent}
                 onClose={() => setSelectedEvent(undefined)}
-                onDelete={async (id, email) => {
+                onDelete={async (id, email, isSeries) => {
                     showLoading(true);
-                    await deleteCalendarEntry(id, email, startOfWeek.toISOString().split("T")[0]);
+                    if (isSeries) {
+                        await deleteCalendarSeries(id, email);
+                    } else {
+                        await deleteCalendarEntry(
+                            id,
+                            email,
+                            startOfWeek.toISOString().split("T")[0],
+                        );
+                    }
                     hideLoading();
                     setSelectedEvent(undefined);
                 }}

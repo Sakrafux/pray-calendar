@@ -5,10 +5,21 @@ export type CalendarEntryDto = {
     Email?: string;
     Start: string;
     End: string;
+    SeriesId?: number;
 };
 
 export type CalendarEntryExtDto = CalendarEntryDto & {
     startDate: Date;
     endDate: Date;
     slots: number;
+};
+
+export type Series = {
+    Interval: string;
+    Repetitions: number;
+};
+
+export type SeriesRequest = {
+    Series: Series;
+    Entry: CalendarEntryDto;
 };

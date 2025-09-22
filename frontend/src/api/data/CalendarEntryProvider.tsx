@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 
 import { useApi } from "@/api/ApiProvider";
 import { useToast } from "@/components/Toast/ToastProvider";
-import type { ApiData, CalendarEntryDto, ContextAction } from "@/types";
+import type { ApiData, CalendarEntryDto, CalendarEntryExtDto, ContextAction } from "@/types";
 
 enum CalendarEntryActions {
     GET_START = "GET_START",
@@ -21,13 +21,13 @@ enum CalendarEntryActions {
     CLEAR_ERROR = "CLEAR_ERROR",
 }
 
-type CalendarEntryData = Record<number, CalendarEntryDto>;
+type CalendarEntryData = Record<number, CalendarEntryExtDto>;
 type CalendarEntryState = ApiData<Record<string, CalendarEntryData>>;
 
 function calendarEntryReducer(
     state: CalendarEntryState,
     action: ContextAction<
-        [string, CalendarEntryData] | [string, CalendarEntryDto],
+        [string, CalendarEntryData] | [string, CalendarEntryExtDto],
         CalendarEntryActions
     >,
 ): CalendarEntryState {
@@ -47,7 +47,7 @@ function calendarEntryReducer(
             if (state.data == null) {
                 return state;
             }
-            const data = action.payload as [string, CalendarEntryDto];
+            const data = action.payload as [string, CalendarEntryExtDto];
             return {
                 ...state,
                 data: {
@@ -108,15 +108,18 @@ export function CalendarEntryProvider({ children }: PropsWithChildren) {
             dispatch({ type: CalendarEntryActions.GET_START });
             try {
                 const data = await api
-                    .get<CalendarEntryDto[]>("/calendar/entries")
+                    .get<CalendarEntryDto[]>("/calendar/entries", { params: { start: date } })
                     .then((res) => res.data);
                 dispatch({
                     type: CalendarEntryActions.GET_SUCCESS,
-                    payload: [date, Object.fromEntries(data.map((f) => [f.Id, f]))],
+                    payload: [
+                        date,
+                        Object.fromEntries(data.map((dto) => [dto.Id, mapDtoToExtDto(dto)])),
+                    ],
                 });
             } catch (err) {
                 dispatch({ type: CalendarEntryActions.QUERY_ERROR, error: err });
-                showToast("error", t("feedback.context.error-getAllCalendarEntries"));
+                showToast("error", t("calendar.context.error-getAllCalendarEntries"));
             }
         },
         [api, showToast, t],
@@ -130,12 +133,12 @@ export function CalendarEntryProvider({ children }: PropsWithChildren) {
                     .then((res) => res.data);
                 dispatch({
                     type: CalendarEntryActions.POST_SUCCESS,
-                    payload: [date, data],
+                    payload: [date, mapDtoToExtDto(data)],
                 });
-                showToast("success", t("feedback.context.success-postCalendarEntry"), 5000);
+                showToast("success", t("calendar.context.success-postCalendarEntry"), 5000);
             } catch (err) {
                 dispatch({ type: CalendarEntryActions.QUERY_ERROR, error: err });
-                showToast("error", t("feedback.context.error-postCalendarEntry"));
+                showToast("error", t("calendar.context.error-postCalendarEntry"));
             }
         },
         [api, showToast, t],
@@ -153,7 +156,7 @@ export function CalendarEntryProvider({ children }: PropsWithChildren) {
                 });
             } catch (err) {
                 dispatch({ type: CalendarEntryActions.QUERY_ERROR, error: err });
-                showToast("error", t("feedback.context.error-deleteCalendarEntry"));
+                showToast("error", t("calendar.context.error-deleteCalendarEntry"));
             }
         },
         [api, showToast, t],
@@ -181,4 +184,14 @@ export function useApiCalendarEntry() {
         throw new Error("useApiCalendarEntry must be used within a CalendarEntryProvider");
     }
     return context;
+}
+
+function mapDtoToExtDto(dto: CalendarEntryDto): CalendarEntryExtDto {
+    const entry = dto as CalendarEntryExtDto;
+    const startDate = new Date(dto.Start);
+    entry.startDate = new Date(startDate.getTime() + startDate.getTimezoneOffset() * 60 * 1000);
+    const endDate = new Date(dto.End);
+    entry.endDate = new Date(endDate.getTime() + endDate.getTimezoneOffset() * 60 * 1000);
+    entry.slots = Math.floor((entry.endDate.getTime() - entry.startDate.getTime()) / 900000);
+    return entry;
 }

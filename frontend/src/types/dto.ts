@@ -6,3 +6,9 @@ export type CalendarEntryDto = {
     Start: string;
     End: string;
 };
+
+export type CalendarEntryExtDto = CalendarEntryDto & {
+    startDate: Date;
+    endDate: Date;
+    slots: number;
+};

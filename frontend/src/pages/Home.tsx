@@ -1,7 +1,9 @@
+import WeeklyCalendar from "@/components/Calendar/Calendar";
+
 function Home() {
     return (
-        <main className="full-wo-header-height w-full">
-            <div>asdf</div>
+        <main className="w-full">
+            <WeeklyCalendar />
         </main>
     );
 }

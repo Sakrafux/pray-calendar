@@ -1,11 +1,29 @@
 {
     "header": {
-        "heading": "24/7 Anbetung St. Pölten"
+        "heading": "24/7 Anbetung St. Pölten",
+        "home": "Kalender",
+        "impressum": "Impressum",
+        "faq": "FAQ"
     },
     "api": {
         "403": "Anfrage fehlgeschlagen aufgrund fehlender Berechtigungen",
         "401": "Anfrage fehlgeschlagen aufgrund fehlender Anmeldung",
         "logout": "Anmeldung ist ausgelaufen, bitte neu anmelden"
+    },
+    "calendar": {
+        "page": {
+            "heading": "Woche des",
+            "prev": "Vorherige",
+            "next": "Nächste",
+            "new": "Neuer Eintrag",
+            "time": "Uhrzeit"
+        },
+        "context": {
+            "error-getAllCalendarEntries": "Kalender-Daten konnten nicht abgefragt werden",
+            "error-postCalendarEntry": "Kalender-Eintrag konnte nicht angelegt werden",
+            "error-deleteCalendarEntry": "Kalender-Eintrag konnte nicht gelöscht werden",
+            "success-postCalendarEntry": "Kalender-Eintrag wurde erfolgreich angelegt"
+        }
     },
     "login": {
         "heading": "Anmeldung",

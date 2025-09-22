@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 
 import { useApiCalendarEntry } from "@/api/data/CalendarEntryProvider";
+import CalendarSlotDetails from "@/components/Calendar/CalendarSlotDetails";
+import { useLoading } from "@/components/LoadingProvider";
 import type { CalendarEntryExtDto } from "@/types";
 
 // quarter-hour slots
@@ -18,8 +20,10 @@ type CalendarSlotsProps = {
 
 function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
     const [events, setEvents] = useState<CalendarEntryExtDto[]>([]);
+    const [selectedEvent, setSelectedEvent] = useState<CalendarEntryExtDto>();
 
-    const { state } = useApiCalendarEntry();
+    const { state, deleteCalendarEntry } = useApiCalendarEntry();
+    const { showLoading, hideLoading } = useLoading();
 
     useEffect(() => {
         const searchDate = startOfWeek.toISOString().split("T")[0];
@@ -80,8 +84,9 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
                             if (event.slots === 1) {
                                 eventDiv = (
                                     <div
-                                        className="absolute inset-1 z-10 flex items-center rounded-lg bg-blue-500 p-2 text-xs text-white shadow"
+                                        className="absolute inset-1 z-10 flex cursor-pointer items-center bg-blue-500 p-2 text-xs text-white shadow hover:bg-blue-600 active:bg-blue-700"
                                         style={{ height: `${event.slots * 2.5 - 0.5}rem` }}
+                                        onClick={() => setSelectedEvent(event)}
                                     >
                                         {event.Start.slice(11, 16)}
                                         {" - "}
@@ -95,8 +100,9 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
                             } else {
                                 eventDiv = (
                                     <div
-                                        className="absolute inset-1 z-10 flex flex-col rounded-lg bg-blue-500 p-2 text-xs text-white shadow"
+                                        className="absolute inset-1 z-10 flex cursor-pointer flex-col bg-blue-500 p-2 text-xs text-white shadow hover:bg-blue-600 active:bg-blue-700"
                                         style={{ height: `${event.slots * 2.5 - 0.5}rem` }}
+                                        onClick={() => setSelectedEvent(event)}
                                     >
                                         <div>
                                             {event.Start.slice(11, 16)}
@@ -123,6 +129,16 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
                     })}
                 </React.Fragment>
             ))}
+            <CalendarSlotDetails
+                event={selectedEvent}
+                onClose={() => setSelectedEvent(undefined)}
+                onDelete={async (id, email) => {
+                    showLoading(true);
+                    await deleteCalendarEntry(id, email, startOfWeek.toISOString().split("T")[0]);
+                    hideLoading();
+                    setSelectedEvent(undefined);
+                }}
+            />
         </>
     );
 }

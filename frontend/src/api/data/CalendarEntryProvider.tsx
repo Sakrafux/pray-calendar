@@ -62,9 +62,11 @@ function calendarEntryReducer(
                 return state;
             }
             const { id, date } = action.params!;
+            const newState = { ...state.data[date] };
+            delete newState[id];
             return {
                 ...state,
-                data: { ...state.data, [date]: { ...state.data[date], [id]: undefined } },
+                data: { ...state.data, [date]: newState },
                 error: undefined,
             };
         }

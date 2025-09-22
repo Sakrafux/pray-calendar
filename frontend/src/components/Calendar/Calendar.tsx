@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -21,8 +22,21 @@ function addDays(date: Date, days: number): Date {
     return d;
 }
 
+const variants = {
+    enter: (direction: number) => ({
+        x: direction > 0 ? 300 : -300, // enter from right or left
+        opacity: 0,
+    }),
+    center: { x: 0, opacity: 1 },
+    exit: (direction: number) => ({
+        x: direction > 0 ? -300 : 300, // exit opposite
+        opacity: 0,
+    }),
+};
+
 export default function WeeklyCalendar() {
     const [currentWeekStart, setCurrentWeekStart] = useState<Date>(startOfWeek(new Date()));
+    const [direction, setDirection] = useState(0); // 1 = next, -1 = prev
 
     const { state, getAllCalendarEntries } = useApiCalendarEntry();
     const { showLoading, hideLoading } = useLoading();
@@ -33,6 +47,16 @@ export default function WeeklyCalendar() {
         [currentWeekStart],
     );
 
+    const nextWeek = () => {
+        setDirection(1);
+        setCurrentWeekStart(addDays(currentWeekStart, 7));
+    };
+
+    const prevWeek = () => {
+        setDirection(-1);
+        setCurrentWeekStart(addDays(currentWeekStart, -7));
+    };
+
     useEffect(() => {
         const searchDate = currentWeekStart.toISOString().split("T")[0];
         if (!state.data?.[searchDate] && !state.loading && !state.error) {
@@ -42,13 +66,13 @@ export default function WeeklyCalendar() {
     }, [currentWeekStart, getAllCalendarEntries, hideLoading, showLoading, state]);
 
     return (
-        <div className="full-wo-header-height p-4">
+        <div className="full-wo-header-height flex flex-col p-4">
             {/* Header */}
-            <div className="flex h-12 items-center justify-between pb-4">
+            <div className="flex h-12 flex-shrink-0 items-center justify-between pb-4">
                 <div className="flex flex-1"></div>
                 <div className="flex flex-1 justify-center gap-4">
                     <button
-                        onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}
+                        onClick={prevWeek}
                         className="cursor-pointer bg-gray-200 px-3 py-1 hover:bg-gray-300 active:bg-gray-400"
                     >
                         <ArrowLeft
@@ -62,7 +86,7 @@ export default function WeeklyCalendar() {
                         {t("calendar.page.heading")} {currentWeekStart.toLocaleDateString("de-DE")}
                     </h2>
                     <button
-                        onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}
+                        onClick={nextWeek}
                         className="cursor-pointer bg-gray-200 px-3 py-1 hover:bg-gray-300 active:bg-gray-400"
                     >
                         {t("calendar.page.next")}
@@ -82,25 +106,38 @@ export default function WeeklyCalendar() {
             </div>
 
             {/* Calendar Grid */}
-            <div className="grid max-h-[calc(100%-3rem)] grid-cols-[120px_repeat(7,1fr)] overflow-y-auto border border-gray-400">
-                {/* Day headers */}
-                <div className="sticky top-0 z-20 border-b border-gray-400 bg-gray-200 p-2 text-center font-semibold">
-                    {t("calendar.page.time")}
-                </div>
-                {days.map((day) => (
-                    <div
-                        key={day.toISOString()}
-                        className="sticky top-0 z-20 border-b border-gray-400 bg-gray-200 p-2 text-center font-semibold"
+            <div className="relative flex-1 overflow-hidden">
+                <AnimatePresence custom={direction}>
+                    <motion.div
+                        key={currentWeekStart.toISOString()} // important: triggers AnimatePresence
+                        custom={direction}
+                        variants={variants}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                        className="absolute grid h-full w-full grid-cols-[120px_repeat(7,1fr)] overflow-y-auto border border-gray-400"
                     >
-                        {day.toLocaleDateString("de-DE", {
-                            weekday: "long",
-                            day: "numeric",
-                            month: "numeric",
-                        })}
-                    </div>
-                ))}
+                        {/* Day headers */}
+                        <div className="sticky top-0 z-20 border-b border-gray-400 bg-gray-200 p-2 text-center font-semibold">
+                            {t("calendar.page.time")}
+                        </div>
+                        {days.map((day) => (
+                            <div
+                                key={day.toISOString()}
+                                className="sticky top-0 z-20 border-b border-gray-400 bg-gray-200 p-2 text-center font-semibold"
+                            >
+                                {day.toLocaleDateString("de-DE", {
+                                    weekday: "long",
+                                    day: "numeric",
+                                    month: "numeric",
+                                })}
+                            </div>
+                        ))}
 
-                <CalendarSlots startOfWeek={currentWeekStart} days={days} />
+                        <CalendarSlots startOfWeek={currentWeekStart} days={days} />
+                    </motion.div>
+                </AnimatePresence>
             </div>
         </div>
     );

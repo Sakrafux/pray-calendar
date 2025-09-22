@@ -16,7 +16,11 @@
             "prev": "Vorherige",
             "next": "Nächste",
             "new": "Neuer Eintrag",
-            "time": "Uhrzeit"
+            "time": "Uhrzeit",
+            "from": "Von",
+            "to": "Bis",
+            "email-placeholder": "Email eingeben",
+            "delete": "Löschen"
         },
         "context": {
             "error-getAllCalendarEntries": "Kalender-Daten konnten nicht abgefragt werden",

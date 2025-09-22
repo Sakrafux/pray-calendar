@@ -54,6 +54,21 @@ func (h *ApiHandler) PostEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if entry.Start.Before(time.Now()) {
+		http.Error(w, "Start time must be in the future", http.StatusBadRequest)
+		return
+	}
+
+	if !entry.Start.Before(entry.End) {
+		http.Error(w, "Start must be before End", http.StatusBadRequest)
+		return
+	}
+
+	if entry.End.Sub(entry.Start).Hours() > 24 {
+		http.Error(w, "Duration may not be too long", http.StatusBadRequest)
+		return
+	}
+
 	insertEntry, err := h.db.InsertEntry(entry)
 	if err != nil {
 		if err.Error() == "No entry inserted" {

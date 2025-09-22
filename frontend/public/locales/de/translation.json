@@ -22,6 +22,18 @@
             "email-placeholder": "Email eingeben",
             "delete": "Löschen"
         },
+        "modal-new": {
+            "heading": "Neuer Eintrag",
+            "firstname": "Vorname",
+            "lastname": "Nachname",
+            "email": "E-Mail",
+            "startdate": "Start-Zeitpunkt",
+            "enddate": "End-Zeitpunkt",
+            "submit": "Eintragen",
+            "error-past": "Start-Zeitpunkt muss in der Zukunft liegen",
+            "error-order": "Start- muss vor End-Zeitpunkt liegen",
+            "error-duration": "Ein Eintrag darf nicht über 24 Stunden sein"
+        },
         "context": {
             "error-getAllCalendarEntries": "Kalender-Daten konnten nicht abgefragt werden",
             "error-postCalendarEntry": "Kalender-Eintrag konnte nicht angelegt werden",

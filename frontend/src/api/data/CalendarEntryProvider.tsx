@@ -86,7 +86,7 @@ function calendarEntryReducer(
 type CalendarEntryContextType = {
     state: CalendarEntryState;
     getAllCalendarEntries: (date: string) => Promise<void>;
-    postCalendarEntry: (entry: CalendarEntryDto, date: string) => Promise<void>;
+    postCalendarEntry: (entry: CalendarEntryDto, date: string) => Promise<boolean>;
     deleteCalendarEntry: (id: number, email: string, date: string) => Promise<void>;
     clearError: () => void;
 };
@@ -138,9 +138,11 @@ export function CalendarEntryProvider({ children }: PropsWithChildren) {
                     payload: [date, mapDtoToExtDto(data)],
                 });
                 showToast("success", t("calendar.context.success-postCalendarEntry"), 5000);
+                return true;
             } catch (err) {
                 dispatch({ type: CalendarEntryActions.QUERY_ERROR, error: err });
                 showToast("error", t("calendar.context.error-postCalendarEntry"));
+                return false;
             }
         },
         [api, showToast, t],

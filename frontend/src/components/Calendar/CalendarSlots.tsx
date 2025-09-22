@@ -93,7 +93,7 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
                                         {event.End.slice(11, 16)}
                                         {" : "}
                                         {event.FirstName} {event.LastName ?? ""}
-                                        {" - "}
+                                        {event.Email ? " - " : ""}
                                         {event.Email ?? ""}
                                     </div>
                                 );

@@ -60,7 +60,7 @@ function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsPr
                             <div>
                                 {event.FirstName} {event.LastName ?? ""}
                             </div>
-                            {event.Email ?? <div>{event.Email}</div>}
+                            {event.Email && <div>{event.Email}</div>}
                         </div>
 
                         {event.endDate.getTime() < new Date().getTime() ? null : (

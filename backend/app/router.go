@@ -1,20 +1,29 @@
-package main
+package app
 
 import (
 	"net/http"
-	"pray-calendar/middleware"
+
+	"github.com/Sakrafux/pray-calendar/backend/middleware"
+	"github.com/Sakrafux/pray-calendar/backend/security"
 )
 
-func CreateRouter(db *DBHandler) http.Handler {
+func CreateRouter(db *DBHandler, admin *security.AdminData) http.Handler {
 	router := http.NewServeMux()
 
-	apiHandler := NewApiHandler(db)
+	apiHandler := NewApiHandler(db, admin)
 
 	router.HandleFunc("GET /calendar/entries", apiHandler.GetAllEntries)
 	router.HandleFunc("POST /calendar/entries", apiHandler.PostEntry)
 	router.HandleFunc("OPTIONS /calendar/entries", nullHandler)
 	router.HandleFunc("DELETE /calendar/entries/{id}", apiHandler.DeleteEntry)
 	router.HandleFunc("OPTIONS /calendar/entries/{id}", nullHandler)
+
+	router.HandleFunc("POST /admin/login", apiHandler.Login)
+	router.HandleFunc("OPTIONS /admin/login", nullHandler)
+	router.HandleFunc("GET /admin/token", apiHandler.RefreshToken)
+	router.HandleFunc("OPTIONS /admin/token", nullHandler)
+	router.HandleFunc("DELETE /admin/user", apiHandler.DeleteUserData)
+	router.HandleFunc("OPTIONS /admin/user", nullHandler)
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("OK"))

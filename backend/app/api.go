@@ -1,0 +1,208 @@
+package app
+
+import (
+	"encoding/json"
+	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/Sakrafux/pray-calendar/backend/security"
+)
+
+type ApiHandler struct {
+	db    *DBHandler
+	admin *security.AdminData
+}
+
+func NewApiHandler(db *DBHandler, admin *security.AdminData) *ApiHandler {
+	return &ApiHandler{db: db, admin: admin}
+}
+
+func (h *ApiHandler) GetAllEntries(w http.ResponseWriter, r *http.Request) {
+	start := r.URL.Query().Get("start")
+	startTime, err := time.Parse("2006-01-02", start)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if isAdmin(r) {
+		entries, err := h.db.GetAllFullEntriesForWeek(startTime)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		writeJson(w, entries)
+		return
+	}
+
+	entries, err := h.db.GetAllEntriesForWeek(startTime)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	writeJson(w, entries)
+}
+
+func (h *ApiHandler) PostEntry(w http.ResponseWriter, r *http.Request) {
+	var entry CalendarEntryFull
+	err := json.NewDecoder(r.Body).Decode(&entry)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	insertEntry, err := h.db.InsertEntry(entry)
+	if err != nil {
+		if err.Error() == "No entry inserted" {
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	writeJson(w, insertEntry)
+	w.WriteHeader(http.StatusCreated)
+}
+
+func (h *ApiHandler) DeleteEntry(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if isAdmin(r) {
+		err = h.db.DeleteEntryAdmin(id)
+	} else {
+		email := r.URL.Query().Get("email")
+		err = h.db.DeleteEntry(id, email)
+	}
+
+	if err != nil {
+		if err.Error() == "No entry deleted" {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *ApiHandler) DeleteUserData(w http.ResponseWriter, r *http.Request) {
+	if !isAdmin(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	firstname := r.URL.Query().Get("firstname")
+	lastname := r.URL.Query().Get("lastname")
+	email := r.URL.Query().Get("email")
+
+	err := h.db.DeleteUserInformation(firstname, lastname, email)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *ApiHandler) Login(w http.ResponseWriter, r *http.Request) {
+	var login security.AdminData
+	err := json.NewDecoder(r.Body).Decode(&login)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if login.Username != h.admin.Username || login.Password != h.admin.Password {
+		http.Error(w, "Invalid login", http.StatusUnauthorized)
+		return
+	}
+
+	refreshToken, err := security.CreateRefreshToken()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	accessToken, err := security.CreateAccessToken()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		HttpOnly: true,
+		Secure:   false,
+		Path:     "/api/admin/token",
+		MaxAge:   30 * 24 * 60 * 60, // 7 days
+		SameSite: http.SameSiteStrictMode,
+	})
+
+	writeJson(w, accessToken)
+}
+
+func (h *ApiHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("refresh_token")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	token := cookie.Value
+
+	_, err = security.ValidateRefreshToken(token)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	refreshToken, err := security.CreateRefreshToken()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	accessToken, err := security.CreateAccessToken()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		HttpOnly: true,
+		Secure:   false,
+		Path:     "/api/admin/token",
+		MaxAge:   30 * 24 * 60 * 60, // 30 days
+		SameSite: http.SameSiteStrictMode,
+	})
+
+	writeJson(w, accessToken)
+}
+
+func writeJson(w http.ResponseWriter, data any) {
+	b, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(b)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func isAdmin(r *http.Request) bool {
+	auth := r.Header.Get("Authorization")
+	tokenString := ""
+	if len(auth) > 7 && auth[:7] == "Bearer " {
+		tokenString = auth[7:]
+		_, err := security.ValidateAccessToken(tokenString)
+		return err == nil
+	}
+	return false
+}

@@ -13,9 +13,9 @@ type CalendarSlotNewProps = {
 
 function CalendarSlotNew({ open, onClose, onSubmit }: CalendarSlotNewProps) {
     const [formData, setFormData] = useState({
-        firstName: "",
-        lastName: "",
-        email: "",
+        firstName: localStorage.getItem("new-firstname") ?? "",
+        lastName: localStorage.getItem("new-lastname") ?? "",
+        email: localStorage.getItem("new-email") ?? "",
         startDate: "",
         startHour: "0",
         startMinute: "0",
@@ -59,6 +59,10 @@ function CalendarSlotNew({ open, onClose, onSubmit }: CalendarSlotNewProps) {
             return;
         }
 
+        localStorage.setItem("new-firstname", formData.firstName);
+        localStorage.setItem("new-lastname", formData.lastName);
+        localStorage.setItem("new-email", formData.email!);
+
         const dto: CalendarEntryDto = {
             Id: -1,
             FirstName: formData.firstName,
@@ -69,9 +73,9 @@ function CalendarSlotNew({ open, onClose, onSubmit }: CalendarSlotNewProps) {
         };
         if (await onSubmit(dto)) {
             setFormData({
-                firstName: "",
-                lastName: "",
-                email: "",
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                email: formData.email,
                 startDate: "",
                 startHour: "0",
                 startMinute: "0",

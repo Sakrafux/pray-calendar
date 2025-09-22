@@ -48,7 +48,18 @@ function Header() {
                     </NavLink>
                 </nav>
 
-                <div className="flex flex-1 justify-end space-x-4"> {token ? "Admin" : null}</div>
+                <div className="flex flex-1 justify-end space-x-4">
+                    {token ? (
+                        <NavLink
+                            to="/admin"
+                            className={({ isActive }) =>
+                                `${linkBaseClasses} ${isActive ? linkActiveClasses : ""}`
+                            }
+                        >
+                            {t("header.admin")}
+                        </NavLink>
+                    ) : null}
+                </div>
             </div>
         </header>
     );

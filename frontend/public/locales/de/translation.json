@@ -3,7 +3,8 @@
         "heading": "24/7 Anbetung St. Pölten",
         "home": "Kalender",
         "impressum": "Impressum",
-        "faq": "FAQ"
+        "faq": "FAQ",
+        "admin": "Admin"
     },
     "api": {
         "403": "Anfrage fehlgeschlagen aufgrund fehlender Berechtigungen",
@@ -49,5 +50,16 @@
         "username-placeholder": "max-mustermann",
         "password": "Passwort",
         "sign-in": "Anmelden"
+    },
+    "admin": {
+        "heading": "Admin-Werkzeuge",
+        "userinfo": "Löschen von Nutzerdaten",
+        "userinfo-hint": "Aus datenschutzrechtlichen Gründen notwendig",
+        "userinfo-hint2": "Löscht alle zukünftigen Einträge und anonymisiert ehemalige Einträge",
+        "firstname": "Vorname",
+        "lastname": "Nachname",
+        "email": "E-Mail",
+        "delete": "Löschen",
+        "logout": "Abmelden"
     }
 }

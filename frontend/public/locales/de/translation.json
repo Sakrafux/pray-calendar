@@ -3,7 +3,7 @@
         "heading": "24/7 Anbetung St. Pölten",
         "home": "Kalender",
         "impressum": "Impressum",
-        "faq": "FAQ",
+        "faq": "Hilfe",
         "admin": "Admin"
     },
     "api": {
@@ -61,5 +61,27 @@
         "email": "E-Mail",
         "delete": "Löschen",
         "logout": "Abmelden"
+    },
+    "faq": {
+        "heading": "Hilfe",
+        "purpose-q": "Was ist der Zweck dieser Website?",
+        "purpose": "Diese Website dient der Organisation und Koordinierung von durchgängiger, eucharistischer Anbetung in St. Pölten.",
+        "location-q": "Wo findet die Anbetung statt?",
+        "location": "???",
+        "calendar-q": "Was zeigt der Kalender an?",
+        "calendar": "Der Kalender zeigt die Timeslots an, zu denen sich eine Person zum Gebet bereit erklärt hat und sich dementsprechend eingetragen hat.",
+        "account-q": "Brauche ich einen Account, um mich eintragen zu können",
+        "account": "Nein, du benötigst keinen Account um dich einzutragen. Du musst lediglich Vornamen, Nachnamen und eine Email angeben. Die Email dient hierbei lediglich der Kontaktaufnahme, falls notwendig, aber wird im Regelfall nicht benötigt.",
+        "data-security-q": "Sind meine Daten öffentlich einsehbar?",
+        "data-security": "Ja und Nein, für andere ist nur der angegebene Vorname sichtbar. Lediglich der Administrator ist in der Lage, alle Informationen einzusehen.",
+        "delete-q": "Ich kann einen Timeslot nicht wahrnehmen. Wie kann ich das beheben?",
+        "delete": "Du kannst auf einen Timeslot klicken, um die Details zu öffnen. Dort kannst du die E-Mail eingeben, die du zur Eintragung verwendest hast, um den Eintrag wieder zu löschen. Alternativ kann der Administrator auch direkt eingreifen.",
+        "data-removal-q": "Werden meine Daten permanent gespeichert?",
+        "data-removal": "Ja, aber wir können deine Daten auf Anfrage einfach löschen. Allerdings bedeutet das auch, dass alle zukünftigen Kalender-Einträge von dir auch gelöscht werden.",
+        "creation-q": "Welche Daten brauche ich, um mich eintragen zu können?",
+        "creation": "Neben Vornamen, Nachnamen und E-Mail, brauchst du den Start- und End-Zeitpunkt deines Timeslots. Neue Eintragungen dürfen nur in der Zukunft gemacht werden. Zusätzlich kann sich nur eine Person pro Timeslot eintragen, d.h. überlappende Eintragungen führen zu Fehlern.",
+        "privacy-title": "Datenschutzrichtlinie",
+        "privacy": "Es werden Vorname, Nachname und E-Mail erfasst. Diese Daten werden primär für die Identifikation einer Eintragung anstelle eines vollen Accounts verwendet. Zusätzlich kann die E-Mail im Ausnahmefall für die direkte Kommunikation verwendet werden. Es werden keine automatisierten Nachrichten, Werbung oder Ähnliches versendet. Auf Anfrage können alle benutzerbezogenen Daten entfernt werden.",
+        "privacy2": "Eingegebene Daten werden im lokalen Browser ebenfalls zwischengespeichert, um eine besserer Erfahrung für Benutzer zu schaffen. Diese Daten bleiben komplett unter Kontrolle des Benutzers und seines Endgeräts."
     }
 }

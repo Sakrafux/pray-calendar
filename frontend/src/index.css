@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+@layer base {
+    :root {
+        --header-height: 4rem;
+    }
+}
+
+@layer components {
+    .text-container {
+        @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+    }
+
+    .header-height {
+        height: var(--header-height);
+    }
+
+    .full-wo-header-height {
+        height: calc(100vh - var(--header-height));
+    }
+}

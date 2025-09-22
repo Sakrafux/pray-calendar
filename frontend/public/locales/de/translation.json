@@ -1,0 +1,19 @@
+{
+    "header": {
+        "heading": "24/7 Anbetung St. Pölten"
+    },
+    "api": {
+        "403": "Anfrage fehlgeschlagen aufgrund fehlender Berechtigungen",
+        "401": "Anfrage fehlgeschlagen aufgrund fehlender Anmeldung",
+        "logout": "Anmeldung ist ausgelaufen, bitte neu anmelden"
+    },
+    "login": {
+        "heading": "Anmeldung",
+        "error-incomplete": "Bitte füllen Sie alle Felder aus",
+        "error-failed": "Anmeldung fehlgeschlagen",
+        "username": "Benutzer",
+        "username-placeholder": "max-mustermann",
+        "password": "Passwort",
+        "sign-in": "Anmelden"
+    }
+}

@@ -65,7 +65,7 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
                 <React.Fragment key={`${hour}-${minute}`}>
                     {/* Only show hour label at :00 rows */}
                     <div
-                        className={`h-10 border-gray-400 bg-gray-100 p-2 text-right text-sm ${minute === 0 ? "border-t" : ""}`}
+                        className={`sticky left-0 z-20 h-10 border-r border-gray-400 bg-gray-100 p-2 text-right text-sm ${minute === 0 ? "border-t" : ""}`}
                     >
                         {minute === 0 ? `${hour}:00` : ""}
                     </div>

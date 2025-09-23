@@ -69,6 +69,7 @@ func (h *ApiHandler) PostEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	entry.SeriesId = nil
 	insertEntry, err := h.db.InsertEntry(entry)
 	if err != nil {
 		if err.Error() == "no entry inserted" {

@@ -1,17 +1,58 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Variant } from "framer-motion";
 import { X } from "lucide-react";
 import { type ChangeEvent, type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { CalendarEntryDto, Series } from "@/types";
 
+const transitionEdge = (mobile?: boolean) => {
+    const res: Variant = {};
+
+    if (mobile) {
+        res.bottom = 0;
+        res.left = 0;
+        res.right = 0;
+        res.top = "100%";
+        res.position = "absolute";
+    } else {
+        res.height = "100%";
+        res.width = 0;
+        res.position = "relative";
+    }
+
+    return res;
+};
+
+const variants = {
+    enter: transitionEdge,
+    center: (mobile?: boolean) => {
+        const res: Variant = {};
+
+        if (mobile) {
+            res.bottom = 0;
+            res.left = 0;
+            res.right = 0;
+            res.top = "4rem";
+            res.position = "absolute";
+        } else {
+            res.height = "100%";
+            res.width = 500;
+            res.position = "relative";
+        }
+
+        return res;
+    },
+    exit: transitionEdge,
+};
+
 type CalendarSlotNewProps = {
+    mobile?: boolean;
     open: boolean;
     onClose: () => void;
     onSubmit: (entry: CalendarEntryDto, series?: Series) => Promise<boolean>;
 };
 
-function CalendarSlotNew({ open, onClose, onSubmit }: CalendarSlotNewProps) {
+function CalendarSlotNew({ mobile, open, onClose, onSubmit }: CalendarSlotNewProps) {
     const [formData, setFormData] = useState({
         firstName: localStorage.getItem("new-firstname") ?? "",
         lastName: localStorage.getItem("new-lastname") ?? "",
@@ -108,9 +149,11 @@ function CalendarSlotNew({ open, onClose, onSubmit }: CalendarSlotNewProps) {
         <AnimatePresence>
             {open && (
                 <motion.aside
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: 500, opacity: 1 }}
-                    exit={{ width: 0, opacity: 0 }}
+                    custom={mobile}
+                    variants={variants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="relative overflow-hidden bg-white p-6 shadow-[0_0_20px_rgba(0,0,0,0.2)]"
                 >

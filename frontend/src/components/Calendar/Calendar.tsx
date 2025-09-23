@@ -7,6 +7,7 @@ import { useApiCalendarEntry } from "@/api/data/CalendarEntryProvider";
 import CalendarSlotNew from "@/components/Calendar/CalendarSlotNew";
 import CalendarSlots from "@/components/Calendar/CalendarSlots";
 import { useLoading } from "@/components/LoadingProvider";
+import type { CalendarEntryDto, Series } from "@/types";
 import { addDays, startOfWeek } from "@/util/date";
 
 const variants = {
@@ -46,6 +47,22 @@ export default function WeeklyCalendar() {
         setCurrentWeekStart(addDays(currentWeekStart, -7));
     };
 
+    const onSubmitNew = async (entry: CalendarEntryDto, series?: Series) => {
+        if (series != null) {
+            if (await postCalendarSeries(entry, series)) {
+                setNewEntryModal(false);
+                return true;
+            }
+            return false;
+        }
+
+        if (await postCalendarEntry(entry, currentWeekStart.toISOString().split("T")[0])) {
+            setNewEntryModal(false);
+            return true;
+        }
+        return false;
+    };
+
     useEffect(() => {
         const searchDate = currentWeekStart.toISOString().split("T")[0];
         if (!state.data?.[searchDate] && !state.loading && !state.error) {
@@ -57,8 +74,7 @@ export default function WeeklyCalendar() {
     return (
         <div className="flex w-full flex-row">
             <div className="full-wo-header-height flex flex-1 flex-col p-4">
-                {/* Header */}
-                <div className="flex h-12 flex-shrink-0 items-center justify-between pb-4">
+                <div className="hidden h-12 flex-shrink-0 items-center justify-between pb-4 md:flex">
                     <div className="flex w-[200px] flex-shrink-0"></div>
                     <div className="flex flex-1 justify-center gap-4">
                         <button
@@ -103,7 +119,34 @@ export default function WeeklyCalendar() {
                     </div>
                 </div>
 
-                {/* Calendar Grid */}
+                <div className="flex items-center justify-between gap-4 pb-4 md:hidden">
+                    <button
+                        onClick={prevWeek}
+                        className="cursor-pointer bg-gray-200 px-3 py-3 hover:bg-gray-300 active:bg-gray-400"
+                    >
+                        <ArrowLeft
+                            className="mr-1 inline align-text-bottom"
+                            height="20"
+                            width="20"
+                        />
+                        {t("calendar.page.prev")}
+                    </button>
+                    <h2 className="cursor-default text-xl font-semibold">
+                        {t("calendar.page.heading")} {currentWeekStart.toLocaleDateString("de-DE")}
+                    </h2>
+                    <button
+                        onClick={nextWeek}
+                        className="cursor-pointer bg-gray-200 px-3 py-3 hover:bg-gray-300 active:bg-gray-400"
+                    >
+                        {t("calendar.page.next")}
+                        <ArrowRight
+                            className="ml-1 inline align-text-bottom"
+                            height="20"
+                            width="20"
+                        />
+                    </button>
+                </div>
+
                 <div className="relative flex-1 overflow-hidden">
                     <AnimatePresence custom={direction}>
                         <motion.div
@@ -114,16 +157,15 @@ export default function WeeklyCalendar() {
                             animate="center"
                             exit="exit"
                             transition={{ duration: 0.4, ease: "easeInOut" }}
-                            className="absolute grid h-full w-full grid-cols-[120px_repeat(7,1fr)] overflow-y-auto border border-gray-400"
+                            className="absolute grid h-full w-full grid-cols-[120px_repeat(7,minmax(150px,1fr))] overflow-y-auto border border-gray-400"
                         >
-                            {/* Day headers */}
-                            <div className="sticky top-0 z-20 border-b border-gray-400 bg-gray-200 p-2 text-center font-semibold">
+                            <div className="sticky top-0 left-0 z-30 border-r border-b border-gray-400 bg-gray-200 p-2 text-center font-semibold">
                                 {t("calendar.page.time")}
                             </div>
                             {days.map((day) => (
                                 <div
                                     key={day.toISOString()}
-                                    className="sticky top-0 z-20 border-b border-gray-400 bg-gray-200 p-2 text-center font-semibold"
+                                    className="sticky top-0 z-20 border-b border-l border-gray-400 bg-gray-200 p-2 text-center font-semibold"
                                 >
                                     {day.toLocaleDateString("de-DE", {
                                         weekday: "long",
@@ -137,28 +179,32 @@ export default function WeeklyCalendar() {
                         </motion.div>
                     </AnimatePresence>
                 </div>
-            </div>
-            <CalendarSlotNew
-                open={newEntryModal}
-                onClose={() => setNewEntryModal(false)}
-                onSubmit={async (entry, series) => {
-                    if (series != null) {
-                        if (await postCalendarSeries(entry, series)) {
-                            setNewEntryModal(false);
-                            return true;
-                        }
-                        return false;
-                    }
 
-                    if (
-                        await postCalendarEntry(entry, currentWeekStart.toISOString().split("T")[0])
-                    ) {
-                        setNewEntryModal(false);
-                        return true;
-                    }
-                    return false;
-                }}
-            />
+                <div className="mt-4 md:hidden">
+                    <button
+                        className="w-full cursor-pointer bg-blue-500 px-6 py-4 font-bold text-white hover:bg-blue-600 active:bg-blue-700"
+                        onClick={() => setNewEntryModal((cur) => !cur)}
+                    >
+                        <Plus className="mr-1 inline align-text-bottom" height="20" width="20" />
+                        {t("calendar.page.new")}
+                    </button>
+                </div>
+            </div>
+            <div className="hidden md:block">
+                <CalendarSlotNew
+                    open={newEntryModal}
+                    onClose={() => setNewEntryModal(false)}
+                    onSubmit={onSubmitNew}
+                />
+            </div>
+            <div className="z-40 block md:hidden">
+                <CalendarSlotNew
+                    mobile
+                    open={newEntryModal}
+                    onClose={() => setNewEntryModal(false)}
+                    onSubmit={onSubmitNew}
+                />
+            </div>
         </div>
     );
 }

@@ -6,6 +6,9 @@ services:
       context: ../
       dockerfile: docker/Dockerfile
       target: webserver
+      args:
+        VITE_BASE: /
+        VITE_API_BASE_URL: /api
     command: ["--db-path", "./db/data.db", "--admin-name", "admin", "--admin-password", "admin"]
     ports:
       - "8080:8080"

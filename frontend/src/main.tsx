@@ -12,7 +12,7 @@ import { LoadingProvider } from "@/components/LoadingProvider";
 import { ToastProvider } from "@/components/Toast/ToastProvider";
 
 createRoot(document.getElementById("root")!).render(
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.VITE_BASE || "/"}>
         <ToastProvider>
             <LoadingProvider>
                 <AuthProvider>

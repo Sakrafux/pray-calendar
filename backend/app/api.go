@@ -239,7 +239,7 @@ func (h *ApiHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "refresh_token",
+		Name:     "pray_calendar-refresh_token",
 		Value:    refreshToken,
 		HttpOnly: true,
 		Secure:   false,
@@ -252,7 +252,7 @@ func (h *ApiHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ApiHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("refresh_token")
+	cookie, err := r.Cookie("pray_calendar-refresh_token")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -277,7 +277,7 @@ func (h *ApiHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "refresh_token",
+		Name:     "pray_calendar-refresh_token",
 		Value:    refreshToken,
 		HttpOnly: true,
 		Secure:   false,

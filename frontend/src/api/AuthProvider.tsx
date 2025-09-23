@@ -53,7 +53,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const initialState: AuthState = {
     data: (() => {
-        const token = localStorage.getItem("auth_token");
+        const token = localStorage.getItem("pray_calendar-auth_token");
         if (token) {
             const jwt = parseJwt(token);
             return {
@@ -91,7 +91,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
                 };
 
                 dispatch({ type: AuthActions.RESULT, payload: data });
-                localStorage.setItem("auth_token", rawData);
+                localStorage.setItem("pray_calendar-auth_token", rawData);
 
                 return data;
             } catch (err) {
@@ -112,7 +112,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
             };
 
             dispatch({ type: AuthActions.RESULT, payload: data });
-            localStorage.setItem("auth_token", rawData);
+            localStorage.setItem("pray_calendar-auth_token", rawData);
 
             return data;
         } catch (err) {
@@ -123,7 +123,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const logout = useCallback(async () => {
         dispatch({ type: AuthActions.RESULT, payload: undefined });
 
-        localStorage.removeItem("auth_token");
+        localStorage.removeItem("pray_calendar-auth_token");
     }, []);
 
     const value = useMemo(

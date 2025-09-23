@@ -21,7 +21,10 @@ RUN npm install
 
 COPY ../frontend/. .
 
-RUN npm run build
+ARG VITE_BASE
+ARG VITE_API_BASE_URL
+
+RUN VITE_BASE=$VITE_BASE VITE_API_BASE_URL=$VITE_API_BASE_URL npm run build
 
 # Stage 2: webserver runtime
 FROM debian:bookworm-slim as webserver

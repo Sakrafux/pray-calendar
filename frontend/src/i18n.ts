@@ -14,7 +14,7 @@ i18n.use(HttpApi)
             escapeValue: false, // React already escapes by default
         },
         backend: {
-            loadPath: "/locales/{{lng}}/translation.json", // where translation files live
+            loadPath: `${import.meta.env.VITE_BASE || "/"}locales/{{lng}}/translation.json`, // where translation files live
         },
     });
 

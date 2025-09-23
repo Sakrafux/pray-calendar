@@ -170,7 +170,7 @@ export default function WeeklyCalendar() {
                             animate="center"
                             exit="exit"
                             transition={{ duration: 0.4, ease: "easeInOut" }}
-                            className="absolute grid h-full w-full grid-cols-[120px_repeat(7,minmax(150px,1fr))] overflow-y-auto border border-gray-400"
+                            className="absolute grid h-full w-full grid-cols-[100px_repeat(7,minmax(150px,1fr))] overflow-y-auto border border-gray-400"
                             onScroll={(e) => {
                                 const target = e.target as HTMLDivElement;
                                 tableScrollRef.current.scrollTop = target.scrollTop;

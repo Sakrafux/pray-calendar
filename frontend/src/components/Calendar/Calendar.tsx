@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useApiCalendarEntry } from "@/api/data/CalendarEntryProvider";
@@ -26,6 +26,11 @@ export default function WeeklyCalendar() {
     const [currentWeekStart, setCurrentWeekStart] = useState<Date>(startOfWeek(new Date()));
     const [direction, setDirection] = useState(0); // 1 = next, -1 = prev
     const [newEntryModal, setNewEntryModal] = useState(false);
+    const tableRef = useRef<HTMLDivElement>(null);
+    const tableScrollRef = useRef<{ scrollTop: number; scrollLeft: number }>({
+        scrollTop: 0,
+        scrollLeft: 0,
+    });
 
     const { state, getAllCalendarEntries, postCalendarEntry, postCalendarSeries } =
         useApiCalendarEntry();
@@ -70,6 +75,13 @@ export default function WeeklyCalendar() {
             getAllCalendarEntries(searchDate).then(() => hideLoading());
         }
     }, [currentWeekStart, getAllCalendarEntries, hideLoading, showLoading, state]);
+
+    useEffect(() => {
+        if (tableRef.current) {
+            tableRef.current.scrollTop = tableScrollRef.current.scrollTop;
+            tableRef.current.scrollLeft = tableScrollRef.current.scrollLeft;
+        }
+    }, [currentWeekStart]);
 
     return (
         <div className="flex w-full flex-row">
@@ -150,6 +162,7 @@ export default function WeeklyCalendar() {
                 <div className="relative flex-1 overflow-hidden">
                     <AnimatePresence custom={direction}>
                         <motion.div
+                            ref={tableRef}
                             key={currentWeekStart.toISOString()} // important: triggers AnimatePresence
                             custom={direction}
                             variants={variants}
@@ -158,6 +171,11 @@ export default function WeeklyCalendar() {
                             exit="exit"
                             transition={{ duration: 0.4, ease: "easeInOut" }}
                             className="absolute grid h-full w-full grid-cols-[120px_repeat(7,minmax(150px,1fr))] overflow-y-auto border border-gray-400"
+                            onScroll={(e) => {
+                                const target = e.target as HTMLDivElement;
+                                tableScrollRef.current.scrollTop = target.scrollTop;
+                                tableScrollRef.current.scrollLeft = target.scrollLeft;
+                            }}
                         >
                             <div className="sticky top-0 left-0 z-30 border-r border-b border-gray-400 bg-gray-200 p-2 text-center font-semibold">
                                 {t("calendar.page.time")}

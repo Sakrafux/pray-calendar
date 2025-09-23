@@ -169,12 +169,6 @@ export function CalendarEntryProvider({ children }: PropsWithChildren) {
                         Object.fromEntries(data.map((dto) => [dto.Id, mapDtoToExtDto(dto)])),
                     ],
                 });
-                console.log(
-                    data.map((dto) => [
-                        mapDtoToExtDto(dto),
-                        startOfWeek(mapDtoToExtDto(dto).startDate).toISOString(),
-                    ]),
-                );
             } catch (err) {
                 dispatch({ type: CalendarEntryActions.QUERY_ERROR, error: err });
                 showToast("error", t("calendar.context.error-getAllCalendarEntries"));

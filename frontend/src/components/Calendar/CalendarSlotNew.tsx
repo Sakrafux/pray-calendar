@@ -32,7 +32,7 @@ const variants = {
             res.bottom = 0;
             res.left = 0;
             res.right = 0;
-            res.top = "4rem";
+            res.top = "var(--header-height)";
             res.position = "absolute";
         } else {
             res.height = "100%";

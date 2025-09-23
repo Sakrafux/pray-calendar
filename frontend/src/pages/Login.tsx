@@ -43,7 +43,7 @@ function Login() {
 
     return (
         <main className="full-wo-header-height flex items-center justify-center bg-gray-50">
-            <div className="mt-[-4rem] w-full max-w-md bg-white p-6 shadow-lg">
+            <div className="mt-[-var(--header-height)] w-full max-w-md bg-white p-6 shadow-lg">
                 <h1 className="mb-6 text-center text-2xl font-semibold text-gray-800">
                     {t("login.heading")}
                 </h1>

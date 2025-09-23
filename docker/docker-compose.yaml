@@ -1,0 +1,16 @@
+name: pray-calendar
+
+services:
+  webserver:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+      target: webserver
+    command: ["--db-path", "./db/data.db", "--admin-name", "admin", "--admin-password", "admin"]
+    ports:
+      - "8080:8080"
+    volumes:
+      - db-data:/app/db
+
+volumes:
+  db-data:

@@ -26,6 +26,7 @@ export default function WeeklyCalendar() {
     const [currentWeekStart, setCurrentWeekStart] = useState<Date>(startOfWeek(new Date()));
     const [direction, setDirection] = useState(0); // 1 = next, -1 = prev
     const [newEntryModal, setNewEntryModal] = useState(false);
+    const [newEntryDatetime, setNewEntryDatetime] = useState<{ date: string; time: number }>();
     const tableRef = useRef<HTMLDivElement>(null);
     const tableScrollRef = useRef<{ scrollTop: number; scrollLeft: number }>({
         scrollTop: 0,
@@ -193,7 +194,14 @@ export default function WeeklyCalendar() {
                                 </div>
                             ))}
 
-                            <CalendarSlots startOfWeek={currentWeekStart} days={days} />
+                            <CalendarSlots
+                                startOfWeek={currentWeekStart}
+                                days={days}
+                                onSlotClick={(date, time) => {
+                                    setNewEntryModal(true);
+                                    setNewEntryDatetime({ date, time });
+                                }}
+                            />
                         </motion.div>
                     </AnimatePresence>
                 </div>
@@ -201,7 +209,10 @@ export default function WeeklyCalendar() {
                 <div className="mt-4 md:hidden">
                     <button
                         className="w-full cursor-pointer bg-blue-500 px-6 py-4 font-bold text-white hover:bg-blue-600 active:bg-blue-700"
-                        onClick={() => setNewEntryModal((cur) => !cur)}
+                        onClick={() => {
+                            setNewEntryModal((cur) => !cur);
+                            setNewEntryDatetime(undefined);
+                        }}
                     >
                         <Plus className="mr-1 inline align-text-bottom" height="20" width="20" />
                         {t("calendar.page.new")}
@@ -211,7 +222,11 @@ export default function WeeklyCalendar() {
             <div className="hidden md:block">
                 <CalendarSlotNew
                     open={newEntryModal}
-                    onClose={() => setNewEntryModal(false)}
+                    initDatetime={newEntryDatetime}
+                    onClose={() => {
+                        setNewEntryModal(false);
+                        setNewEntryDatetime(undefined);
+                    }}
                     onSubmit={onSubmitNew}
                 />
             </div>
@@ -219,7 +234,11 @@ export default function WeeklyCalendar() {
                 <CalendarSlotNew
                     mobile
                     open={newEntryModal}
-                    onClose={() => setNewEntryModal(false)}
+                    initDatetime={newEntryDatetime}
+                    onClose={() => {
+                        setNewEntryModal(false);
+                        setNewEntryDatetime(undefined);
+                    }}
                     onSubmit={onSubmitNew}
                 />
             </div>

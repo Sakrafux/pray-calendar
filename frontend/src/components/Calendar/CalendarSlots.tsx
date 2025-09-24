@@ -13,9 +13,10 @@ for (let h = 0; h < 24; h++) {
 type CalendarSlotsProps = {
     startOfWeek: Date;
     days: Date[];
+    onSlotClick: (date: string, time: number) => void;
 };
 
-function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
+function CalendarSlots({ startOfWeek, days, onSlotClick }: CalendarSlotsProps) {
     const [events, setEvents] = useState<CalendarEntryExtDto[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<CalendarEntryExtDto>();
 
@@ -83,8 +84,11 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
                             if (event.slots === 1) {
                                 eventDiv = (
                                     <div
-                                        className={`absolute inset-1 z-10 flex cursor-pointer items-center p-2 text-xs text-white shadow ${color}`}
-                                        onClick={() => setSelectedEvent(event)}
+                                        className={`absolute inset-1 z-10 flex cursor-pointer items-center p-2 text-left text-xs text-white shadow ${color}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedEvent(event);
+                                        }}
                                     >
                                         {event.FirstName} {event.LastName ?? ""}
                                         {event.Email ? " - " : ""}
@@ -94,9 +98,12 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
                             } else {
                                 eventDiv = (
                                     <div
-                                        className={`absolute inset-1 z-10 flex cursor-pointer flex-col p-2 text-xs text-white shadow ${color}`}
+                                        className={`absolute inset-1 z-10 flex cursor-pointer flex-col p-2 text-left text-xs text-white shadow ${color}`}
                                         style={{ height: `calc(${event.slots}00% - 0.5rem)` }}
-                                        onClick={() => setSelectedEvent(event)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedEvent(event);
+                                        }}
                                     >
                                         <div>
                                             {event.Start.slice(11, 16)}
@@ -113,21 +120,35 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
                         }
 
                         const isPast = slotDate.getTime() < new Date().getTime();
-                        let color = "";
+                        let dynamicStyling: string;
                         if (day.getDay() === 6) {
-                            color = "bg-amber-100";
+                            dynamicStyling = "bg-amber-100";
+                            if (!isPast) {
+                                dynamicStyling = `${dynamicStyling} hover:bg-amber-200 active:bg-amber-300 cursor-pointer`;
+                            }
                         } else if (day.getDay() === 0) {
-                            color = "bg-amber-200";
+                            dynamicStyling = "bg-amber-200";
+                            if (!isPast) {
+                                dynamicStyling = `${dynamicStyling} hover:bg-amber-300 active:bg-amber-400 cursor-pointer`;
+                            }
                         } else {
                             if (isPast) {
-                                color = "bg-gray-200";
+                                dynamicStyling = "bg-gray-200";
+                            } else {
+                                dynamicStyling =
+                                    "hover:bg-gray-100 active:bg-gray-200 cursor-pointer";
                             }
                         }
 
                         return (
                             <div
                                 key={day.toISOString() + hour}
-                                className={`relative min-h-10 border-t border-l border-gray-400 ${isPast ? "opacity-50" : "opacity-100"} ${color}`}
+                                className={`relative min-h-10 border-t border-l border-gray-400 ${isPast ? "opacity-50" : "opacity-100"} ${dynamicStyling}`}
+                                onClick={() =>
+                                    isPast
+                                        ? null
+                                        : onSlotClick(day.toISOString().split("T")[0], hour)
+                                }
                             >
                                 {eventDiv}
                             </div>

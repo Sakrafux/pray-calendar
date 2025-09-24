@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, type Variant } from "framer-motion";
 import { Minus, X } from "lucide-react";
-import { type ChangeEvent, type FormEvent, useState } from "react";
+import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { CalendarEntryDto, Series } from "@/types";
@@ -48,11 +48,12 @@ const variants = {
 type CalendarSlotNewProps = {
     mobile?: boolean;
     open: boolean;
+    initDatetime?: { date: string; time: number };
     onClose: () => void;
     onSubmit: (entry: CalendarEntryDto, series?: Series) => Promise<boolean>;
 };
 
-function CalendarSlotNew({ mobile, open, onClose, onSubmit }: CalendarSlotNewProps) {
+function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: CalendarSlotNewProps) {
     const [formData, setFormData] = useState({
         firstName: localStorage.getItem("pray_calendar-new-firstname") ?? "",
         lastName: localStorage.getItem("pray_calendar-new-lastname") ?? "",
@@ -67,7 +68,7 @@ function CalendarSlotNew({ mobile, open, onClose, onSubmit }: CalendarSlotNewPro
     });
     const [error, setError] = useState("");
 
-    const hours = Array.from({ length: 25 }, (_, i) => i); // 0–23
+    const hours = Array.from({ length: 25 }, (_, i) => i); // 0–24
 
     const { t } = useTranslation();
 
@@ -141,6 +142,23 @@ function CalendarSlotNew({ mobile, open, onClose, onSubmit }: CalendarSlotNewPro
             setError("");
         }
     };
+
+    useEffect(() => {
+        setFormData({
+            firstName: localStorage.getItem("pray_calendar-new-firstname") ?? "",
+            lastName: localStorage.getItem("pray_calendar-new-lastname") ?? "",
+            email: localStorage.getItem("pray_calendar-new-email") ?? "",
+            date: initDatetime?.date ?? "",
+            startHour: initDatetime?.time.toString() ?? "0",
+            endHour:
+                (initDatetime?.time != null ? (initDatetime.time + 1).toString() : undefined) ??
+                "0",
+            series: false,
+            // "weekly" | "monthly"
+            recurrence: "weekly",
+            repetitions: 1,
+        });
+    }, [initDatetime]);
 
     return (
         <AnimatePresence>
@@ -240,7 +258,7 @@ function CalendarSlotNew({ mobile, open, onClose, onSubmit }: CalendarSlotNewPro
                                     onChange={handleChange}
                                     className="border p-2"
                                 >
-                                    {hours.map((h) => (
+                                    {hours.slice(0, 24).map((h) => (
                                         <option key={h} value={h}>
                                             {h.toString().padStart(2, "0")}
                                         </option>
@@ -255,7 +273,7 @@ function CalendarSlotNew({ mobile, open, onClose, onSubmit }: CalendarSlotNewPro
                                     onChange={handleChange}
                                     className="border p-2"
                                 >
-                                    {hours.map((h) => (
+                                    {hours.slice(1, 25).map((h) => (
                                         <option key={h} value={h}>
                                             {h.toString().padStart(2, "0")}
                                         </option>

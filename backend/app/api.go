@@ -69,6 +69,12 @@ func (h *ApiHandler) PostEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if entry.IsBlocker {
+		entry.FirstName = "Blocker"
+		entry.LastName = ""
+		entry.Email = ""
+	}
+
 	entry.SeriesId = nil
 	insertEntry, err := h.db.InsertEntry(entry)
 	if err != nil {
@@ -107,6 +113,12 @@ func (h *ApiHandler) PostSeries(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if seriesReq.Entry.IsBlocker {
+		seriesReq.Entry.FirstName = "Blocker"
+		seriesReq.Entry.LastName = ""
+		seriesReq.Entry.Email = ""
+	}
+
 	entries := []CalendarEntryFull{seriesReq.Entry}
 	for range seriesReq.Series.Repetitions - 1 {
 		nextEntry := entries[len(entries)-1]
@@ -116,6 +128,9 @@ func (h *ApiHandler) PostSeries(w http.ResponseWriter, r *http.Request) {
 		} else if seriesReq.Series.Interval == "monthly" {
 			nextEntry.Start = nextEntry.Start.AddDate(0, 1, 0)
 			nextEntry.End = nextEntry.End.AddDate(0, 1, 0)
+		} else if seriesReq.Series.Interval == "daily" {
+			nextEntry.Start = nextEntry.Start.AddDate(0, 0, 1)
+			nextEntry.End = nextEntry.End.AddDate(0, 0, 1)
 		} else {
 			http.Error(w, "Invalid interval", http.StatusBadRequest)
 			return

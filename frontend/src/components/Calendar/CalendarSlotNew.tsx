@@ -3,6 +3,7 @@ import { Minus, X } from "lucide-react";
 import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useAuth } from "@/api/AuthProvider";
 import type { CalendarEntryDto, Series } from "@/types";
 
 const transitionEdge = (mobile?: boolean) => {
@@ -62,7 +63,8 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
         startHour: "0",
         endHour: "0",
         series: false,
-        // "weekly" | "monthly"
+        blocker: false,
+        // "daily" | "weekly" | "monthly"
         recurrence: "weekly",
         repetitions: 1,
     });
@@ -70,6 +72,9 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
 
     const hours = Array.from({ length: 25 }, (_, i) => i); // 0–24
 
+    const {
+        state: { data: isAdmin },
+    } = useAuth();
     const { t } = useTranslation();
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -120,6 +125,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
             Start: new Date(start.getTime() - start.getTimezoneOffset() * 60 * 1000).toISOString(),
             End: new Date(end.getTime() - end.getTimezoneOffset() * 60 * 1000).toISOString(),
             SeriesId: -1,
+            IsBlocker: formData.blocker,
         };
         const series: Series | undefined = formData.series
             ? {
@@ -136,6 +142,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                 startHour: "0",
                 endHour: "0",
                 series: false,
+                blocker: false,
                 recurrence: "weekly",
                 repetitions: 1,
             });
@@ -154,7 +161,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                 (initDatetime?.time != null ? (initDatetime.time + 1).toString() : undefined) ??
                 "0",
             series: false,
-            // "weekly" | "monthly"
+            blocker: false,
             recurrence: "weekly",
             repetitions: 1,
         });
@@ -289,7 +296,6 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                                     name="series"
                                     checked={formData.series}
                                     onChange={handleChange}
-                                    className="rounded"
                                 />
                                 <span className="font-medium">
                                     {t("calendar.modal-new.series")}
@@ -303,6 +309,16 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                                             {t("calendar.modal-new.recurrence")}
                                         </label>
                                         <div className="mt-1 flex gap-4">
+                                            <label className="flex items-center gap-2">
+                                                <input
+                                                    type="radio"
+                                                    name="recurrence"
+                                                    value="daily"
+                                                    checked={formData.recurrence === "daily"}
+                                                    onChange={handleChange}
+                                                />
+                                                {t("calendar.modal-new.recurrence-daily")}
+                                            </label>
                                             <label className="flex items-center gap-2">
                                                 <input
                                                     type="radio"
@@ -344,9 +360,23 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                             )}
                         </div>
 
+                        {isAdmin && (
+                            <label className="mt-2 flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    name="blocker"
+                                    checked={formData.blocker}
+                                    onChange={handleChange}
+                                />
+                                <span className="font-medium">
+                                    {t("calendar.modal-new.blocker")}
+                                </span>
+                            </label>
+                        )}
+
                         <button
                             type="submit"
-                            className="mt-2 w-full cursor-pointer bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 active:bg-blue-700"
+                            className="mt-4 w-full cursor-pointer bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 active:bg-blue-700"
                         >
                             {t("calendar.modal-new.submit")}
                         </button>

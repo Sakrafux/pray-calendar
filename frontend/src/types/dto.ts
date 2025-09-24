@@ -6,6 +6,7 @@ export type CalendarEntryDto = {
     Start: string;
     End: string;
     SeriesId?: number;
+    IsBlocker: boolean;
 };
 
 export type CalendarEntryExtDto = CalendarEntryDto & {

@@ -3,6 +3,7 @@ import { Trash, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useAuth } from "@/api/AuthProvider";
 import type { CalendarEntryExtDto } from "@/types";
 
 function formatIsoDateString(isoDate: string): string {
@@ -19,6 +20,9 @@ type CalendarSlotDetailsProps = {
 function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsProps) {
     const [inputValue, setInputValue] = useState("");
 
+    const {
+        state: { data: isAdmin },
+    } = useAuth();
     const { t } = useTranslation();
 
     return (
@@ -56,7 +60,7 @@ function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsPr
                             </div>
                         </h2>
 
-                        {event.SeriesId && (
+                        {event.SeriesId && !event.IsBlocker && (
                             <div className="mb-2">{t("calendar.page.part-of-series")}</div>
                         )}
 
@@ -67,7 +71,8 @@ function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsPr
                             {event.Email && <div>{event.Email}</div>}
                         </div>
 
-                        {event.endDate.getTime() < new Date().getTime() ? null : (
+                        {event.endDate.getTime() < new Date().getTime() ||
+                        (event.IsBlocker && !isAdmin) ? null : (
                             <div className="mt-4 flex flex-col gap-2 opacity-50 focus-within:opacity-100">
                                 <input
                                     type="text"

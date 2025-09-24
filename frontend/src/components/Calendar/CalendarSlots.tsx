@@ -27,33 +27,7 @@ function CalendarSlots({ startOfWeek, days, onSlotClick }: CalendarSlotsProps) {
         const searchDate = startOfWeek.toISOString().split("T")[0];
         const data = state.data?.[searchDate];
         if (data) {
-            setEvents(
-                Object.values(data).flatMap((d) => {
-                    if (d.startDate.getDate() != d.endDate.getDate()) {
-                        const dayBreak = new Date(d.endDate.getTime());
-                        dayBreak.setHours(0);
-                        dayBreak.setMinutes(0);
-
-                        return [
-                            {
-                                ...d,
-                                endDate: dayBreak,
-                                slots: Math.floor(
-                                    (dayBreak.getTime() - d.startDate.getTime()) / 900000,
-                                ),
-                            },
-                            {
-                                ...d,
-                                startDate: dayBreak,
-                                slots: Math.floor(
-                                    (d.endDate.getTime() - dayBreak.getTime()) / 900000,
-                                ),
-                            },
-                        ];
-                    }
-                    return d;
-                }),
-            );
+            setEvents(Object.values(data));
         }
     }, [startOfWeek, state]);
 
@@ -77,10 +51,11 @@ function CalendarSlots({ startOfWeek, days, onSlotClick }: CalendarSlotsProps) {
 
                         let eventDiv = null;
                         if (event) {
-                            const color =
-                                event.SeriesId != null
-                                    ? "bg-orange-500 hover:bg-orange-600 active:bg-orange-700"
-                                    : "bg-blue-500 hover:bg-blue-600 active:bg-blue-700";
+                            const color = event.IsBlocker
+                                ? "bg-black"
+                                : event.SeriesId != null
+                                  ? "bg-orange-500 hover:bg-orange-600 active:bg-orange-700"
+                                  : "bg-blue-500 hover:bg-blue-600 active:bg-blue-700";
                             if (event.slots === 1) {
                                 eventDiv = (
                                     <div

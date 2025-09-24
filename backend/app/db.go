@@ -134,7 +134,7 @@ func (h *DBHandler) InsertEntry(entry CalendarEntryFull) (*CalendarEntry, error)
 
 	var newEntry CalendarEntry
 	err = h.db.QueryRow("SELECT id, firstname, starttime, endtime, is_blocker, series_id FROM calendar_entries WHERE id = $1", id).Scan(
-		&newEntry.Id, &newEntry.FirstName, &newEntry.Start, &newEntry.End, &entry.IsBlocker, &newEntry.SeriesId)
+		&newEntry.Id, &newEntry.FirstName, &newEntry.Start, &newEntry.End, &newEntry.IsBlocker, &newEntry.SeriesId)
 	if err != nil {
 		return nil, err
 	}

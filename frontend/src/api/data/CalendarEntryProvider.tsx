@@ -76,10 +76,10 @@ function calendarEntryReducer(
             const newState = { ...state, error: undefined };
 
             data.forEach(([date, dto]) => {
-                if (state.data![date] != null) {
+                if (newState.data![date] != null) {
                     newState.data = {
                         ...newState.data,
-                        [date]: { ...state.data![date], [dto.Id]: dto },
+                        [date]: { ...newState.data![date], [dto.Id]: dto },
                     };
                 }
             });

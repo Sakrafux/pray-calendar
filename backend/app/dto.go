@@ -7,8 +7,8 @@ type CalendarEntry struct {
 	FirstName string
 	Start     time.Time
 	End       time.Time
-	SeriesId  *int
 	IsBlocker bool
+	SeriesId  *int
 }
 
 type CalendarEntryFull struct {

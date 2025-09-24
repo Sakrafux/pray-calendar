@@ -96,8 +96,6 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
         const end = new Date(start);
         end.setTime(end.getTime() + timeDiff);
 
-        console.log(start, end);
-
         if (start.getTime() < new Date().getTime()) {
             setError(t("calendar.modal-new.error-past"));
             return;

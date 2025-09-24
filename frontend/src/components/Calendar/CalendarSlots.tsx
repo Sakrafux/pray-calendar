@@ -5,12 +5,9 @@ import CalendarSlotDetails from "@/components/Calendar/CalendarSlotDetails";
 import { useLoading } from "@/components/LoadingProvider";
 import type { CalendarEntryExtDto } from "@/types";
 
-// quarter-hour slots
-const slots: { hour: number; minute: number }[] = [];
+const slots: { hour: number }[] = [];
 for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += 15) {
-        slots.push({ hour: h, minute: m });
-    }
+    slots.push({ hour: h });
 }
 
 type CalendarSlotsProps = {
@@ -61,18 +58,16 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
 
     return (
         <>
-            {slots.map(({ hour, minute }) => (
-                <React.Fragment key={`${hour}-${minute}`}>
-                    {/* Only show hour label at :00 rows */}
-                    <div
-                        className={`sticky left-0 z-20 h-10 border-r border-gray-400 bg-gray-100 p-2 text-right text-sm ${minute === 0 ? "border-t" : ""}`}
-                    >
-                        {minute === 0 ? `${hour}:00` : ""}
+            {slots.map(({ hour }) => (
+                <React.Fragment key={`${hour}`}>
+                    <div className="sticky left-0 z-20 min-h-10 content-center border-t border-r border-gray-400 bg-gray-100 p-2 text-center text-sm">
+                        {`${hour.toString().padStart(2, "0")}:00`} -{" "}
+                        {`${(hour + 1).toString().padStart(2, "0")}:00`}
                     </div>
 
                     {days.map((day) => {
                         const slotDate = new Date(day);
-                        slotDate.setHours(hour, minute, 0, 0);
+                        slotDate.setHours(hour, 0, 0, 0);
 
                         const event = events.find((e) => {
                             const st = e.startDate.getTime();
@@ -89,13 +84,8 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
                                 eventDiv = (
                                     <div
                                         className={`absolute inset-1 z-10 flex cursor-pointer items-center p-2 text-xs text-white shadow ${color}`}
-                                        style={{ height: `${event.slots * 2.5 - 0.5}rem` }}
                                         onClick={() => setSelectedEvent(event)}
                                     >
-                                        {event.Start.slice(11, 16)}
-                                        {" - "}
-                                        {event.End.slice(11, 16)}
-                                        {" : "}
                                         {event.FirstName} {event.LastName ?? ""}
                                         {event.Email ? " - " : ""}
                                         {event.Email ?? ""}
@@ -105,7 +95,7 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
                                 eventDiv = (
                                     <div
                                         className={`absolute inset-1 z-10 flex cursor-pointer flex-col p-2 text-xs text-white shadow ${color}`}
-                                        style={{ height: `${event.slots * 2.5 - 0.5}rem` }}
+                                        style={{ height: `calc(${event.slots}00% - 0.5rem)` }}
                                         onClick={() => setSelectedEvent(event)}
                                     >
                                         <div>
@@ -122,10 +112,22 @@ function CalendarSlots({ startOfWeek, days }: CalendarSlotsProps) {
                             }
                         }
 
+                        const isPast = slotDate.getTime() < new Date().getTime();
+                        let color = "";
+                        if (day.getDay() === 6) {
+                            color = "bg-amber-100";
+                        } else if (day.getDay() === 0) {
+                            color = "bg-amber-200";
+                        } else {
+                            if (isPast) {
+                                color = "bg-gray-200";
+                            }
+                        }
+
                         return (
                             <div
-                                key={day.toISOString() + hour + minute}
-                                className={`relative h-10 border-t border-l border-gray-400 ${slotDate.getTime() < new Date().getTime() ? "bg-gray-100" : ""}`}
+                                key={day.toISOString() + hour}
+                                className={`relative min-h-10 border-t border-l border-gray-400 ${isPast ? "opacity-50" : "opacity-100"} ${color}`}
                             >
                                 {eventDiv}
                             </div>

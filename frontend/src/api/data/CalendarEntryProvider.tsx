@@ -312,6 +312,6 @@ function mapDtoToExtDto(dto: CalendarEntryDto): CalendarEntryExtDto {
     entry.startDate = new Date(startDate.getTime() + startDate.getTimezoneOffset() * 60 * 1000);
     const endDate = new Date(dto.End);
     entry.endDate = new Date(endDate.getTime() + endDate.getTimezoneOffset() * 60 * 1000);
-    entry.slots = Math.floor((entry.endDate.getTime() - entry.startDate.getTime()) / 900000);
+    entry.slots = Math.ceil((entry.endDate.getTime() - entry.startDate.getTime()) / 3600000);
     return entry;
 }

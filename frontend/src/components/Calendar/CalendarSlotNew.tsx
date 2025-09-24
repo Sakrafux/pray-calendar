@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, type Variant } from "framer-motion";
-import { X } from "lucide-react";
+import { Minus, X } from "lucide-react";
 import { type ChangeEvent, type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -57,12 +57,9 @@ function CalendarSlotNew({ mobile, open, onClose, onSubmit }: CalendarSlotNewPro
         firstName: localStorage.getItem("pray_calendar-new-firstname") ?? "",
         lastName: localStorage.getItem("pray_calendar-new-lastname") ?? "",
         email: localStorage.getItem("pray_calendar-new-email") ?? "",
-        startDate: "",
+        date: "",
         startHour: "0",
-        startMinute: "0",
-        endDate: "",
         endHour: "0",
-        endMinute: "0",
         series: false,
         // "weekly" | "monthly"
         recurrence: "weekly",
@@ -70,8 +67,7 @@ function CalendarSlotNew({ mobile, open, onClose, onSubmit }: CalendarSlotNewPro
     });
     const [error, setError] = useState("");
 
-    const hours = Array.from({ length: 24 }, (_, i) => i); // 0–23
-    const minutes = [0, 15, 30, 45]; // quarter hours
+    const hours = Array.from({ length: 25 }, (_, i) => i); // 0–23
 
     const { t } = useTranslation();
 
@@ -86,11 +82,15 @@ function CalendarSlotNew({ mobile, open, onClose, onSubmit }: CalendarSlotNewPro
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
-        const start = new Date(formData.startDate);
-        start.setHours(Number(formData.startHour), Number(formData.startMinute));
+        const start = new Date(formData.date);
+        start.setHours(Number(formData.startHour));
 
-        const end = new Date(formData.endDate);
-        end.setHours(Number(formData.endHour), Number(formData.endMinute));
+        const timeDiff = (Number(formData.endHour) - Number(formData.startHour)) * 3600000;
+
+        const end = new Date(start);
+        end.setTime(end.getTime() + timeDiff);
+
+        console.log(start, end);
 
         if (start.getTime() < new Date().getTime()) {
             setError(t("calendar.modal-new.error-past"));
@@ -131,12 +131,9 @@ function CalendarSlotNew({ mobile, open, onClose, onSubmit }: CalendarSlotNewPro
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 email: formData.email,
-                startDate: "",
+                date: "",
                 startHour: "0",
-                startMinute: "0",
-                endDate: "",
                 endHour: "0",
-                endMinute: "0",
                 series: false,
                 recurrence: "weekly",
                 repetitions: 1,
@@ -222,13 +219,21 @@ function CalendarSlotNew({ mobile, open, onClose, onSubmit }: CalendarSlotNewPro
                             <div className="mt-1 flex gap-2">
                                 <input
                                     type="date"
-                                    name="startDate"
+                                    name="date"
                                     min={new Date().toISOString().split("T")[0]}
-                                    value={formData.startDate}
+                                    value={formData.date}
                                     onChange={handleChange}
                                     className="flex-1 border p-2"
                                     required
                                 />
+                            </div>
+                        </div>
+
+                        <div className="my-1">
+                            <label className="block text-sm font-medium">
+                                {t("calendar.modal-new.hours")}
+                            </label>
+                            <div className="mt-1 flex gap-2">
                                 <select
                                     name="startHour"
                                     value={formData.startHour}
@@ -241,35 +246,9 @@ function CalendarSlotNew({ mobile, open, onClose, onSubmit }: CalendarSlotNewPro
                                         </option>
                                     ))}
                                 </select>
-                                <select
-                                    name="startMinute"
-                                    value={formData.startMinute}
-                                    onChange={handleChange}
-                                    className="border p-2"
-                                >
-                                    {minutes.map((m) => (
-                                        <option key={m} value={m}>
-                                            {m.toString().padStart(2, "0")}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="my-1">
-                            <label className="block text-sm font-medium">
-                                {t("calendar.modal-new.enddate")}
-                            </label>
-                            <div className="mt-1 flex gap-2">
-                                <input
-                                    type="date"
-                                    name="endDate"
-                                    min={new Date().toISOString().split("T")[0]}
-                                    value={formData.endDate}
-                                    onChange={handleChange}
-                                    className="flex-1 border p-2"
-                                    required
-                                />
+                                <div className="content-center">
+                                    <Minus />
+                                </div>
                                 <select
                                     name="endHour"
                                     value={formData.endHour}
@@ -279,18 +258,6 @@ function CalendarSlotNew({ mobile, open, onClose, onSubmit }: CalendarSlotNewPro
                                     {hours.map((h) => (
                                         <option key={h} value={h}>
                                             {h.toString().padStart(2, "0")}
-                                        </option>
-                                    ))}
-                                </select>
-                                <select
-                                    name="endMinute"
-                                    value={formData.endMinute}
-                                    onChange={handleChange}
-                                    className="border p-2"
-                                >
-                                    {minutes.map((m) => (
-                                        <option key={m} value={m}>
-                                            {m.toString().padStart(2, "0")}
                                         </option>
                                     ))}
                                 </select>

@@ -38,9 +38,6 @@ export function ApiProvider({ children }: PropsWithChildren) {
                     } else {
                         await logout();
                         showToast("error", t("api.logout"));
-                        const controller = new AbortController();
-                        controller.abort();
-                        throw new axios.Cancel("Request canceled: no auth token");
                     }
                 }
             }

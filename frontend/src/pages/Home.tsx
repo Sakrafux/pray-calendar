@@ -8,7 +8,7 @@ function Home() {
         <main className="text-container p-4">
             {/*TODO replace with actual image*/}
             <img
-                src="/anbetung-platzhalter.jpg"
+                src={`${import.meta.env.BASE_URL}anbetung-platzhalter.jpg`}
                 alt={t("home.image-alt")}
                 className="h-56 w-full md:h-96"
             />

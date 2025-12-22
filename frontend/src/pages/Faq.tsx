@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 function Faq() {
     const { t } = useTranslation();
@@ -6,7 +6,6 @@ function Faq() {
     return (
         <main className="text-container p-4">
             <h1 className="mb-6 text-2xl font-bold">{t("faq.heading")}</h1>
-
             <h2 className="mb-2 text-xl font-semibold">{t("faq.purpose-q")}</h2>
             <p>{t("faq.purpose")}</p>
             <h2 className="mt-4 mb-2 text-xl font-semibold">{t("faq.location-q")}</h2>
@@ -25,6 +24,23 @@ function Faq() {
             <p>{t("faq.data-security")}</p>
             <h2 className="mt-4 mb-2 text-xl font-semibold">{t("faq.data-removal-q")}</h2>
             <p>{t("faq.data-removal")}</p>
+            <h2 className="mt-4 mb-2 text-xl font-semibold">{t("faq.issues-q")}</h2>
+            <p>
+                <Trans
+                    i18nKey="faq.issues"
+                    components={{
+                        link: (
+                            <a
+                                href={t("faq.issues-github")}
+                                target="_blank"
+                                className="text-blue-600 decoration-2 underline-offset-4 hover:underline"
+                            >
+                                {t("faq.issues-github")}
+                            </a>
+                        ),
+                    }}
+                />
+            </p>
 
             <h2 className="mt-8 text-2xl font-semibold">{t("faq.privacy-title")}</h2>
             <p>{t("faq.privacy")}</p>

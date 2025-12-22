@@ -129,7 +129,10 @@
         "creation": "Neben Vornamen, Nachnamen und E-Mail, brauchst du den Start- und End-Zeitpunkt deines Timeslots. Neue Eintragungen dürfen nur in der Zukunft gemacht werden. Zusätzlich kann sich nur eine Person pro Timeslot eintragen, d.h. überlappende Eintragungen führen zu Fehlern.",
         "privacy-title": "Datenschutzrichtlinie",
         "privacy": "Es werden Vorname, Nachname und E-Mail erfasst. Diese Daten werden primär für die Identifikation einer Eintragung anstelle eines vollen Accounts verwendet. Zusätzlich kann die E-Mail im Ausnahmefall für die direkte Kommunikation verwendet werden. Es werden keine automatisierten Nachrichten, Werbung oder Ähnliches versendet. Auf Anfrage können alle benutzerbezogenen Daten entfernt werden.",
-        "privacy2": "Eingegebene Daten werden im lokalen Browser ebenfalls zwischengespeichert, um eine besserer Erfahrung für Benutzer zu schaffen. Diese Daten bleiben komplett unter Kontrolle des Benutzers und seines Endgeräts."
+        "privacy2": "Eingegebene Daten werden im lokalen Browser ebenfalls zwischengespeichert, um eine besserer Erfahrung für Benutzer zu schaffen. Diese Daten bleiben komplett unter Kontrolle des Benutzers und seines Endgeräts.",
+        "issues-q": "Wo kann ich Probleme mit der Website melden?",
+        "issues": "Probleme können im Github-Repository der Website <link /> gemeldet werden.",
+        "issues-github": "https://github.com/Sakrafux/pray-calendar/issues"
     },
     "impressum": {
         "heading": "Impressum",

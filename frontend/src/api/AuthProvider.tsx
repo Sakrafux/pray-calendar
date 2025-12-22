@@ -56,9 +56,16 @@ const initialState: AuthState = {
         const token = localStorage.getItem("pray_calendar-auth_token");
         if (token) {
             const jwt = parseJwt(token);
+
+            const expiresAt = new Date(jwt.payload.exp * 1000);
+
+            if (expiresAt < new Date()) {
+                return undefined;
+            }
+
             return {
-                token: token,
-                expiresAt: new Date(jwt.payload.exp * 1000),
+                token,
+                expiresAt,
             };
         } else {
             return undefined;

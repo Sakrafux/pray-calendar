@@ -1,7 +1,10 @@
 package app
 
 import (
+	"encoding/csv"
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -302,6 +305,44 @@ func (h *ApiHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	})
 
 	writeJson(w, accessToken)
+}
+
+func (h *ApiHandler) DownloadEmails(w http.ResponseWriter, r *http.Request) {
+	if !isAdmin(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	interval := r.URL.Query().Get("interval")
+	if interval == "" {
+		interval = "30days"
+	}
+
+	filename := fmt.Sprintf("emails_%s.csv", interval)
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+
+	writer := csv.NewWriter(w)
+	defer writer.Flush()
+
+	rows, err := h.db.GetEmails(interval)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	headers := []string{"Email", "Vorname", "Nachname", "Letztes Datum", "Anzahl an Einträgen"}
+	if err := writer.Write(headers); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, row := range rows {
+		if err := writer.Write(row); err != nil {
+			log.Println("Error writing row to CSV:", err)
+			return
+		}
+	}
 }
 
 func writeJson(w http.ResponseWriter, data any) {

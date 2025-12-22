@@ -31,6 +31,8 @@ func CreateRouter(db *DBHandler, admin *security.AdminData) http.Handler {
 	router.HandleFunc("OPTIONS /admin/token", nullHandler)
 	router.HandleFunc("DELETE /admin/user", apiHandler.DeleteUserData)
 	router.HandleFunc("OPTIONS /admin/user", nullHandler)
+	router.HandleFunc("GET /admin/emails", apiHandler.DownloadEmails)
+	router.HandleFunc("OPTIONS /admin/emails", nullHandler)
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("OK"))

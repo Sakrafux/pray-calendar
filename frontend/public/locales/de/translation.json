@@ -73,13 +73,30 @@
     },
     "admin": {
         "heading": "Admin-Werkzeuge",
-        "userinfo": "Löschen von Nutzerdaten",
-        "userinfo-hint": "Aus datenschutzrechtlichen Gründen notwendig",
-        "userinfo-hint2": "Löscht alle zukünftigen Einträge und anonymisiert ehemalige Einträge",
-        "firstname": "Vorname",
-        "lastname": "Nachname",
-        "email": "E-Mail",
-        "delete": "Löschen",
+        "userdata": {
+            "heading": "Löschen von Nutzerdaten",
+            "hint": "Aus datenschutzrechtlichen Gründen notwendig",
+            "hint2": "Löscht alle zukünftigen Einträge und anonymisiert ehemalige Einträge",
+            "firstname": "Vorname",
+            "lastname": "Nachname",
+            "email": "E-Mail",
+            "delete": "Löschen",
+            "success-delete": "User wurde erfolgreich gelöscht",
+            "error-delete": "User konnte nicht gelöscht werden"
+        },
+        "query-emails": {
+            "heading": "E-Mail-Adressen Abfrage",
+            "hint": "Abruf der E-Mail-Adressen die im gewählten Interval aktiv waren",
+            "hint2": "Die Adressen werden, zusammen mit ergänzenden Informationen, als .csv-Datei abgerufen",
+            "radio-heading": "Aktiv...",
+            "radio-30days": "...in den letzten 30 Tagen",
+            "radio-90days": "...in den letzten 90 Tagen",
+            "radio-1year": "...im letzten Jahr",
+            "radio-all": "...seit Beginn",
+            "query": "E-Mail-Adressen abrufen",
+            "success-query": "E-Mail-Adressen wurden erfolgreich abgerufen",
+            "error-query": "E-Mail-Adressen konnte nicht abgerufen werden"
+        },
         "logout": "Abmelden"
     },
     "faq": {

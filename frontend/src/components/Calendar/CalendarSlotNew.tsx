@@ -360,16 +360,6 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
 
                         {isAdmin && (
                             <div className="mt-3 space-y-1">
-                                {/*<input*/}
-                                {/*    type="checkbox"*/}
-                                {/*    name="blocker"*/}
-                                {/*    checked={formData.blocker}*/}
-                                {/*    onChange={handleChange}*/}
-                                {/*/>*/}
-                                {/*<span className="font-medium">*/}
-                                {/*    {t("calendar.modal-new.blocker")}*/}
-                                {/*</span>*/}
-
                                 <label className="block text-sm font-medium">
                                     {t("calendar.modal-new.admin-event")}
                                 </label>

@@ -246,3 +246,59 @@ func (h *DBHandler) DeleteUserInformation(firstname, lastname, email string) err
 
 	return nil
 }
+
+func (h *DBHandler) GetEmails(interval string) ([][]string, error) {
+	var timeModifier string
+	switch interval {
+	case "30days":
+		timeModifier = "-30 days"
+	case "90days":
+		timeModifier = "-90 days"
+	case "1year":
+		timeModifier = "-1 year"
+	case "all":
+		timeModifier = "-100 years" // Effectively all
+	default:
+		timeModifier = "-30 days"
+	}
+
+	query := `
+        SELECT email, firstname, lastname, MAX(starttime), COUNT(*) as occurences
+        FROM calendar_entries
+        WHERE starttime >= datetime('now', ?)
+        AND email <> '' AND email <> '---'
+        GROUP BY email, firstname, lastname
+        ORDER BY occurences DESC
+    `
+
+	rows, err := h.db.Query(query, timeModifier)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results [][]string
+	for rows.Next() {
+		var email, firstname, lastname, starttimeStr string
+		var count int
+
+		if err := rows.Scan(&email, &firstname, &lastname, &starttimeStr, &count); err != nil {
+			return nil, err
+		}
+
+		starttime, err := time.Parse("2006-01-02 15:04:05 -0700 MST", starttimeStr)
+		if err != nil {
+			return nil, err
+		}
+
+		results = append(results, []string{
+			email,
+			firstname,
+			lastname,
+			starttime.Format("02.01.2006"),
+			fmt.Sprintf("%d", count),
+		})
+	}
+
+	return results, nil
+}

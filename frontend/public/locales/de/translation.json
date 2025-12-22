@@ -1,7 +1,8 @@
 {
     "header": {
         "heading": "24/7 Anbetung St. Pölten",
-        "home": "Kalender",
+        "home": "Home",
+        "calendar": "Kalender",
         "impressum": "Impressum",
         "faq": "Hilfe",
         "admin": "Admin"
@@ -10,6 +11,13 @@
         "403": "Anfrage fehlgeschlagen aufgrund fehlender Berechtigungen",
         "401": "Anfrage fehlgeschlagen aufgrund fehlender Anmeldung",
         "logout": "Anmeldung ist ausgelaufen, bitte neu anmelden"
+    },
+    "home": {
+        "heading": "$t(header.heading)",
+        "image-alt": "Anbetung",
+        "link-calendar": "Zum Kalender",
+        "paragraph-stpoelten": "TODO (St. Pölten spezifische Informationen) Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed iaculis sem elementum porttitor pellentesque. Morbi sollicitudin, felis sed sollicitudin cursus, urna urna scelerisque ex, eu luctus tellus dolor vitae orci. Sed ac cursus mi, at vehicula diam. Nullam egestas scelerisque tellus at feugiat. Nunc rutrum, enim non maximus efficitur, quam felis finibus metus, a cursus felis mi vitae lectus. Quisque egestas eget purus sed gravida. Phasellus id purus placerat, vestibulum sapien mattis, porta sem. Vivamus vel est efficitur, bibendum eros in, blandit justo.",
+        "paragraph-worship": "TODO (Allgemeine Informationen zu Anbetungen) Proin mauris odio, molestie eu consectetur eget, semper et eros. Mauris sem tellus, condimentum nec rutrum ut, finibus ac odio. Phasellus erat ante, eleifend ut lectus ut, tincidunt dapibus felis. Aliquam congue tincidunt massa, ut iaculis magna mattis eget. Duis dictum, enim vel sagittis sollicitudin, urna dui rutrum nibh, vitae dapibus felis nunc nec metus. Sed quis enim metus. Aliquam ac turpis et mauris imperdiet venenatis. Donec fermentum blandit ornare. Quisque aliquam nunc sit amet nisl accumsan posuere. Donec at convallis urna. Nulla in scelerisque nisi, eu molestie justo. Nunc iaculis purus nec euismod pharetra. In erat odio, vehicula maximus tristique at, bibendum in massa. Nulla accumsan ligula ut rhoncus sollicitudin. Duis sed feugiat dui, non congue ex. Phasellus porttitor efficitur bibendum. Morbi ex turpis, bibendum sed nisi sit amet, porttitor viverra enim. Praesent a molestie velit. Pellentesque cursus lobortis urna, eu facilisis tortor porttitor non. Donec pretium consectetur tellus. Sed aliquet cursus euismod."
     },
     "calendar": {
         "page": {
@@ -102,9 +110,9 @@
     "faq": {
         "heading": "Hilfe",
         "purpose-q": "Was ist der Zweck dieser Website?",
-        "purpose": "Diese Website dient der Organisation und Koordinierung von durchgängiger, eucharistischer Anbetung in St. Pölten.",
+        "purpose": "$t(impressum.purpose)",
         "location-q": "Wo findet die Anbetung statt?",
-        "location": "TODO",
+        "location": "$t(impressum.address)",
         "calendar-q": "Was zeigt der Kalender an?",
         "calendar": "Der Kalender zeigt die Timeslots an, zu denen sich eine Person zum Gebet bereit erklärt hat und sich dementsprechend eingetragen hat.",
         "colors-q": "Was bedeuten die unterschiedlichen Farben im Kalender?",
@@ -125,7 +133,7 @@
     },
     "impressum": {
         "heading": "Impressum",
-        "name-heading": "Verantwortlicher",
+        "name-heading": "Verantwortliche",
         "name": "Lydia Schawer",
         "contact-heading": "Kontaktmöglichkeiten",
         "email-heading": "E-Mail",

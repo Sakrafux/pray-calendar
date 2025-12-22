@@ -36,6 +36,14 @@ function Header() {
                         {t("header.home")}
                     </NavLink>
                     <NavLink
+                        to="/calendar"
+                        className={({ isActive }) =>
+                            `${linkBaseClasses} ${isActive ? linkActiveClasses : ""}`
+                        }
+                    >
+                        {t("header.calendar")}
+                    </NavLink>
+                    <NavLink
                         to="/faq"
                         className={({ isActive }) =>
                             `${linkBaseClasses} ${isActive ? linkActiveClasses : ""}`

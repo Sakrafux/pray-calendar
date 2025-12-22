@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 
 import Header from "@/components/Header";
 import Admin from "@/pages/Admin";
+import CalendarPage from "@/pages/CalendarPage";
 import Faq from "@/pages/Faq";
 import Home from "@/pages/Home";
 import Impressum from "@/pages/Impressum";
@@ -14,6 +15,7 @@ function App() {
 
             <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/impressum" element={<Impressum />} />
                 <Route path="/faq" element={<Faq />} />
                 <Route path="/login" element={<Login />} />

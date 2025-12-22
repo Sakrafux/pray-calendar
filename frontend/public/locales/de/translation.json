@@ -104,7 +104,7 @@
         "purpose-q": "Was ist der Zweck dieser Website?",
         "purpose": "Diese Website dient der Organisation und Koordinierung von durchgängiger, eucharistischer Anbetung in St. Pölten.",
         "location-q": "Wo findet die Anbetung statt?",
-        "location": "???",
+        "location": "TODO",
         "calendar-q": "Was zeigt der Kalender an?",
         "calendar": "Der Kalender zeigt die Timeslots an, zu denen sich eine Person zum Gebet bereit erklärt hat und sich dementsprechend eingetragen hat.",
         "colors-q": "Was bedeuten die unterschiedlichen Farben im Kalender?",
@@ -122,5 +122,24 @@
         "privacy-title": "Datenschutzrichtlinie",
         "privacy": "Es werden Vorname, Nachname und E-Mail erfasst. Diese Daten werden primär für die Identifikation einer Eintragung anstelle eines vollen Accounts verwendet. Zusätzlich kann die E-Mail im Ausnahmefall für die direkte Kommunikation verwendet werden. Es werden keine automatisierten Nachrichten, Werbung oder Ähnliches versendet. Auf Anfrage können alle benutzerbezogenen Daten entfernt werden.",
         "privacy2": "Eingegebene Daten werden im lokalen Browser ebenfalls zwischengespeichert, um eine besserer Erfahrung für Benutzer zu schaffen. Diese Daten bleiben komplett unter Kontrolle des Benutzers und seines Endgeräts."
+    },
+    "impressum": {
+        "heading": "Impressum",
+        "name-heading": "Verantwortlicher",
+        "name": "Lydia Schawer",
+        "contact-heading": "Kontaktmöglichkeiten",
+        "email-heading": "E-Mail",
+        "email": "TODO",
+        "phone-heading": "Telefonnummer",
+        "phone": "TODO",
+        "address-heading": "Anschrift",
+        "address": "TODO",
+        "development-heading": "Website-Entwicklung",
+        "developer-heading": "Entwickler",
+        "developer": "Andreas Hell",
+        "github-heading": "GitHub-Repository",
+        "github": "https://github.com/Sakrafux/pray-calendar",
+        "purpose-heading": "Blattlinie",
+        "purpose": "Diese Website dient der Organisation und Koordinierung von durchgängiger, eucharistischer Anbetung in St. Pölten."
     }
 }

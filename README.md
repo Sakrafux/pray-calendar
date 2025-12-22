@@ -55,11 +55,12 @@ This makes the entire application self-contained, requiring only Docker to run.
 
 ## TODOs
 
-- [ ] Finish FAQ
-- [ ] Fill Impressum
-- [ ] GitHub Link (Impressum)
+- [x] Finish FAQ
+- [x] Fill Impressum
+- [x] GitHub Link (Impressum)
 - [ ] Home Page
 - [x] More admin events (analog to blocker)
 - [x] Querying email addresses for admin purposes (recent emails, all emails)
 - [ ] Additional volunteer email list for short term cancellation (ideally automated emails)
   - https://resend.com/home
+- [ ] Fill missing information (TODOs)

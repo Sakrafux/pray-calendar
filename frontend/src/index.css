@@ -20,3 +20,12 @@
         height: calc(var(--vh, 1vh)*100 - var(--header-height));
     }
 }
+
+@theme {
+    --animate-shimmer: shimmer 1s infinite;
+
+    @keyframes shimmer {
+        0%, 100% { transform: translateX(0%) }
+        50% { transform: translateX(100%) }
+    }
+}

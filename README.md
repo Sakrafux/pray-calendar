@@ -59,7 +59,7 @@ This makes the entire application self-contained, requiring only Docker to run.
 - [ ] Fill Impressum
 - [ ] GitHub Link (Impressum)
 - [ ] Home Page
-- [ ] More admin events (analog to blocker)
+- [x] More admin events (analog to blocker)
 - [ ] Querying email adresses for admin purposes (recent emails, all emails)
 - [ ] Additional volunteer email list for short term cancellation (ideally automated emails)
   - https://resend.com/home

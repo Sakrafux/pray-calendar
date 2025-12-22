@@ -63,7 +63,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
         startHour: "0",
         endHour: "0",
         series: false,
-        blocker: false,
+        adminEvent: "",
         // "daily" | "weekly" | "monthly"
         recurrence: "weekly",
         repetitions: 1,
@@ -123,7 +123,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
             Start: new Date(start.getTime() - start.getTimezoneOffset() * 60 * 1000).toISOString(),
             End: new Date(end.getTime() - end.getTimezoneOffset() * 60 * 1000).toISOString(),
             SeriesId: -1,
-            IsBlocker: formData.blocker,
+            AdminEvent: formData.adminEvent || undefined,
         };
         const series: Series | undefined = formData.series
             ? {
@@ -140,7 +140,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                 startHour: "0",
                 endHour: "0",
                 series: false,
-                blocker: false,
+                adminEvent: "",
                 recurrence: "weekly",
                 repetitions: 1,
             });
@@ -159,7 +159,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                 (initDatetime?.time != null ? (initDatetime.time + 1).toString() : undefined) ??
                 "0",
             series: false,
-            blocker: false,
+            adminEvent: "",
             recurrence: "weekly",
             repetitions: 1,
         });
@@ -359,17 +359,43 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                         </div>
 
                         {isAdmin && (
-                            <label className="mt-2 flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    name="blocker"
-                                    checked={formData.blocker}
-                                    onChange={handleChange}
-                                />
-                                <span className="font-medium">
-                                    {t("calendar.modal-new.blocker")}
-                                </span>
-                            </label>
+                            <div className="mt-3 space-y-1">
+                                {/*<input*/}
+                                {/*    type="checkbox"*/}
+                                {/*    name="blocker"*/}
+                                {/*    checked={formData.blocker}*/}
+                                {/*    onChange={handleChange}*/}
+                                {/*/>*/}
+                                {/*<span className="font-medium">*/}
+                                {/*    {t("calendar.modal-new.blocker")}*/}
+                                {/*</span>*/}
+
+                                <label className="block text-sm font-medium">
+                                    {t("calendar.modal-new.admin-event")}
+                                </label>
+                                <div className="mt-1 flex gap-2">
+                                    <select
+                                        name="adminEvent"
+                                        value={formData.adminEvent}
+                                        onChange={handleChange}
+                                        className="border p-2"
+                                    >
+                                        <option value=""></option>
+                                        <option value="mass">
+                                            {t("calendar.modal-new.admin-event-mass")}
+                                        </option>
+                                        <option value="praise">
+                                            {t("calendar.modal-new.admin-event-praise")}
+                                        </option>
+                                        <option value="event">
+                                            {t("calendar.modal-new.admin-event-event")}
+                                        </option>
+                                        <option value="blocker">
+                                            {t("calendar.modal-new.admin-event-blocker")}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
                         )}
 
                         <button

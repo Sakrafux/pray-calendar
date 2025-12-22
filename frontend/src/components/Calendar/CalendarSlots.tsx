@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useApiCalendarEntry } from "@/api/data/CalendarEntryProvider";
 import CalendarSlotDetails from "@/components/Calendar/CalendarSlotDetails";
@@ -22,6 +23,7 @@ function CalendarSlots({ startOfWeek, days, onSlotClick }: CalendarSlotsProps) {
 
     const { state, deleteCalendarEntry, deleteCalendarSeries } = useApiCalendarEntry();
     const { showLoading, hideLoading } = useLoading();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const searchDate = startOfWeek.toISOString().split("T")[0];
@@ -51,11 +53,16 @@ function CalendarSlots({ startOfWeek, days, onSlotClick }: CalendarSlotsProps) {
 
                         let eventDiv = null;
                         if (event) {
-                            const color = event.IsBlocker
+                            const color = event.AdminEvent
                                 ? "bg-black"
                                 : event.SeriesId != null
                                   ? "bg-orange-500 hover:bg-orange-600 active:bg-orange-700"
                                   : "bg-blue-500 hover:bg-blue-600 active:bg-blue-700";
+
+                            const eventName = event.AdminEvent
+                                ? t(`calendar.modal-new.admin-event-${event.AdminEvent}`)
+                                : `${event.FirstName} ${event.LastName ?? ""}`;
+
                             if (event.slots === 1) {
                                 eventDiv = (
                                     <div
@@ -65,7 +72,7 @@ function CalendarSlots({ startOfWeek, days, onSlotClick }: CalendarSlotsProps) {
                                             setSelectedEvent(event);
                                         }}
                                     >
-                                        {event.FirstName} {event.LastName ?? ""}
+                                        {eventName}
                                         {event.Email ? " - " : ""}
                                         {event.Email ?? ""}
                                     </div>
@@ -85,9 +92,7 @@ function CalendarSlots({ startOfWeek, days, onSlotClick }: CalendarSlotsProps) {
                                             {" - "}
                                             {event.End.slice(11, 16)}
                                         </div>
-                                        <div>
-                                            {event.FirstName} {event.LastName ?? ""}
-                                        </div>
+                                        <div>{eventName}</div>
                                         <div>{event.Email ?? ""}</div>
                                     </div>
                                 );

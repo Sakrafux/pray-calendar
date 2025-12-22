@@ -3,12 +3,12 @@ package app
 import "time"
 
 type CalendarEntry struct {
-	Id        int
-	FirstName string
-	Start     time.Time
-	End       time.Time
-	IsBlocker bool
-	SeriesId  *int
+	Id         int
+	FirstName  string
+	Start      time.Time
+	End        time.Time
+	AdminEvent *string
+	SeriesId   *int
 }
 
 type CalendarEntryFull struct {

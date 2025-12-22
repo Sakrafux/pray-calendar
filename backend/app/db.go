@@ -53,7 +53,7 @@ func (h *DBHandler) Setup() {
 			email TEXT NOT NULL,
 			starttime DATETIME NOT NULL,
 			endtime DATETIME NOT NULL,
-			is_blocker BOOLEAN NOT NULL,
+			admin_event TEXT,
 			series_id INTEGER,
 			FOREIGN KEY (series_id) REFERENCES calendar_series(id)
 		);
@@ -66,7 +66,7 @@ func (h *DBHandler) Setup() {
 func (h *DBHandler) GetAllEntriesForWeek(start time.Time) ([]CalendarEntry, error) {
 	end := start.AddDate(0, 0, 7)
 	rows, err := h.db.Query(`
-		SELECT id, firstname, starttime, endtime, is_blocker, series_id FROM calendar_entries
+		SELECT id, firstname, starttime, endtime, admin_event, series_id FROM calendar_entries
 		WHERE starttime <= $1 AND endtime >= $2
 		ORDER BY starttime ASC
 	`, end, start)
@@ -78,7 +78,7 @@ func (h *DBHandler) GetAllEntriesForWeek(start time.Time) ([]CalendarEntry, erro
 	entries := make([]CalendarEntry, 0)
 	for rows.Next() {
 		var entry CalendarEntry
-		if err := rows.Scan(&entry.Id, &entry.FirstName, &entry.Start, &entry.End, &entry.IsBlocker, &entry.SeriesId); err != nil {
+		if err := rows.Scan(&entry.Id, &entry.FirstName, &entry.Start, &entry.End, &entry.AdminEvent, &entry.SeriesId); err != nil {
 			return nil, err
 		}
 		entries = append(entries, entry)
@@ -90,7 +90,7 @@ func (h *DBHandler) GetAllEntriesForWeek(start time.Time) ([]CalendarEntry, erro
 func (h *DBHandler) GetAllFullEntriesForWeek(start time.Time) ([]CalendarEntryFull, error) {
 	end := start.AddDate(0, 0, 7)
 	rows, err := h.db.Query(`
-		SELECT id, firstname, lastname, email, starttime, endtime, is_blocker, series_id FROM calendar_entries
+		SELECT id, firstname, lastname, email, starttime, endtime, admin_event, series_id FROM calendar_entries
 		WHERE starttime <= $1 AND endtime >= $2
 		ORDER BY starttime ASC
 	`, end, start)
@@ -102,7 +102,7 @@ func (h *DBHandler) GetAllFullEntriesForWeek(start time.Time) ([]CalendarEntryFu
 	entries := make([]CalendarEntryFull, 0)
 	for rows.Next() {
 		var entry CalendarEntryFull
-		if err := rows.Scan(&entry.Id, &entry.FirstName, &entry.LastName, &entry.Email, &entry.Start, &entry.End, &entry.IsBlocker, &entry.SeriesId); err != nil {
+		if err := rows.Scan(&entry.Id, &entry.FirstName, &entry.LastName, &entry.Email, &entry.Start, &entry.End, &entry.AdminEvent, &entry.SeriesId); err != nil {
 			return nil, err
 		}
 		entries = append(entries, entry)
@@ -113,13 +113,13 @@ func (h *DBHandler) GetAllFullEntriesForWeek(start time.Time) ([]CalendarEntryFu
 
 func (h *DBHandler) InsertEntry(entry CalendarEntryFull) (*CalendarEntry, error) {
 	res, err := h.db.Exec(`
-		INSERT INTO calendar_entries (firstname, lastname, email, starttime, endtime, is_blocker, series_id) 
+		INSERT INTO calendar_entries (firstname, lastname, email, starttime, endtime, admin_event, series_id) 
 		SELECT $1, $2, $3, $4, $5, $6, $7
 		WHERE NOT EXISTS (
 			SELECT 1 FROM calendar_entries
 			WHERE starttime < $5 AND endtime > $4
 		)
-	`, entry.FirstName, entry.LastName, entry.Email, entry.Start, entry.End, entry.IsBlocker, entry.SeriesId)
+	`, entry.FirstName, entry.LastName, entry.Email, entry.Start, entry.End, entry.AdminEvent, entry.SeriesId)
 	if err != nil {
 		return nil, err
 	}
@@ -133,8 +133,8 @@ func (h *DBHandler) InsertEntry(entry CalendarEntryFull) (*CalendarEntry, error)
 	}
 
 	var newEntry CalendarEntry
-	err = h.db.QueryRow("SELECT id, firstname, starttime, endtime, is_blocker, series_id FROM calendar_entries WHERE id = $1", id).Scan(
-		&newEntry.Id, &newEntry.FirstName, &newEntry.Start, &newEntry.End, &newEntry.IsBlocker, &newEntry.SeriesId)
+	err = h.db.QueryRow("SELECT id, firstname, starttime, endtime, admin_event, series_id FROM calendar_entries WHERE id = $1", id).Scan(
+		&newEntry.Id, &newEntry.FirstName, &newEntry.Start, &newEntry.End, &newEntry.AdminEvent, &newEntry.SeriesId)
 	if err != nil {
 		return nil, err
 	}

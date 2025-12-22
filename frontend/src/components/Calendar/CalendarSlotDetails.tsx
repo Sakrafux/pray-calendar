@@ -60,19 +60,21 @@ function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsPr
                             </div>
                         </h2>
 
-                        {event.SeriesId && !event.IsBlocker && (
+                        {event.SeriesId && !event.AdminEvent && (
                             <div className="mb-2">{t("calendar.page.part-of-series")}</div>
                         )}
 
                         <div className="text-gray-700">
                             <div>
-                                {event.FirstName} {event.LastName ?? ""}
+                                {event.AdminEvent
+                                    ? t(`calendar.modal-new.admin-event-${event.AdminEvent}`)
+                                    : `${event.FirstName} ${event.LastName ?? ""}`}
                             </div>
                             {event.Email && <div>{event.Email}</div>}
                         </div>
 
                         {event.endDate.getTime() < new Date().getTime() ||
-                        (event.IsBlocker && !isAdmin) ? null : (
+                        (event.AdminEvent && !isAdmin) ? null : (
                             <div className="mt-4 flex flex-col gap-2 opacity-50 focus-within:opacity-100">
                                 <input
                                     type="text"

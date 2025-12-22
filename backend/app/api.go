@@ -69,8 +69,8 @@ func (h *ApiHandler) PostEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if entry.IsBlocker {
-		entry.FirstName = "Blocker"
+	if entry.AdminEvent != nil {
+		entry.FirstName = ""
 		entry.LastName = ""
 		entry.Email = ""
 	}
@@ -113,8 +113,8 @@ func (h *ApiHandler) PostSeries(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if seriesReq.Entry.IsBlocker {
-		seriesReq.Entry.FirstName = "Blocker"
+	if seriesReq.Entry.AdminEvent != nil {
+		seriesReq.Entry.FirstName = ""
 		seriesReq.Entry.LastName = ""
 		seriesReq.Entry.Email = ""
 	}

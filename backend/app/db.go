@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/google/uuid"
 	_ "modernc.org/sqlite"
 )
 
@@ -56,6 +57,13 @@ func (h *DBHandler) Setup() {
 			admin_event TEXT,
 			series_id INTEGER,
 			FOREIGN KEY (series_id) REFERENCES calendar_series(id)
+		);
+
+		CREATE TABLE IF NOT EXISTS volunteers (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			email TEXT NOT NULL UNIQUE,
+			confirmed BOOLEAN NOT NULL,
+			confirmation_token TEXT NOT NULL
 		);
 	`)
 	if err != nil {
@@ -262,16 +270,14 @@ func (h *DBHandler) GetEmails(interval string) ([][]string, error) {
 		timeModifier = "-30 days"
 	}
 
-	query := `
+	rows, err := h.db.Query(`
         SELECT email, firstname, lastname, MAX(starttime), COUNT(*) as occurences
         FROM calendar_entries
         WHERE starttime >= datetime('now', ?)
         AND email <> '' AND email <> '---'
         GROUP BY email, firstname, lastname
         ORDER BY occurences DESC
-    `
-
-	rows, err := h.db.Query(query, timeModifier)
+    `, timeModifier)
 	if err != nil {
 		return nil, err
 	}
@@ -298,6 +304,93 @@ func (h *DBHandler) GetEmails(interval string) ([][]string, error) {
 			starttime.Format("02.01.2006"),
 			fmt.Sprintf("%d", count),
 		})
+	}
+
+	return results, nil
+}
+
+func (h *DBHandler) CreateVolunteer(email string) (*Volunteer, error) {
+	token := uuid.New().String()
+
+	res, err := h.db.Exec(`
+		INSERT INTO volunteers (email, confirmed, confirmation_token) 
+		SELECT $1, $2, $3
+	`, email, false, token)
+	if err != nil {
+		return nil, err
+	}
+	if nrOfRows, err := res.RowsAffected(); nrOfRows != 1 || err != nil {
+		return nil, fmt.Errorf("no volunteer inserted")
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	var newVolunteer Volunteer
+	err = h.db.QueryRow("SELECT id, email, confirmation_token FROM volunteers WHERE id = $1", id).Scan(
+		&newVolunteer.Id, &newVolunteer.Email, &newVolunteer.ConfirmationToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return &newVolunteer, nil
+}
+
+func (h *DBHandler) ConfirmVolunteer(email, token string) error {
+	res, err := h.db.Exec(`
+		UPDATE volunteers
+		SET confirmed = TRUE
+		WHERE email = $1 AND confirmation_token = $2
+	`, email, token)
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return fmt.Errorf("no volunteer confirmed")
+	}
+
+	return nil
+}
+
+func (h *DBHandler) DeleteVolunteer(email string) error {
+	res, err := h.db.Exec("DELETE FROM volunteers WHERE email = $1", email)
+	if err != nil {
+		return err
+	}
+	if nrOfRows, err := res.RowsAffected(); nrOfRows != 1 || err != nil {
+		return fmt.Errorf("no entry deleted")
+	}
+	return nil
+}
+
+func (h *DBHandler) GetVolunteerEmails() ([][]string, error) {
+	rows, err := h.db.Query(`
+        SELECT email
+        FROM volunteers
+        WHERE confirmed == TRUE
+    `)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results [][]string
+	for rows.Next() {
+		var email string
+
+		if err := rows.Scan(&email); err != nil {
+			return nil, err
+		}
+
+		results = append(results, []string{email})
 	}
 
 	return results, nil

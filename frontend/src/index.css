@@ -5,6 +5,10 @@
         --header-height: 4rem;
         --vh: 1vh;
     }
+
+    p {
+        @apply text-justify;
+    }
 }
 
 @layer components {

@@ -25,6 +25,10 @@ func CreateRouter(db *DBHandler, admin *security.AdminData) http.Handler {
 	router.HandleFunc("DELETE /calendar/series/{id}", apiHandler.DeleteSeries)
 	router.HandleFunc("OPTIONS /calendar/series/{id}", nullHandler)
 
+	router.HandleFunc("POST /volunteer", apiHandler.PostVolunteerRegistration)
+	router.HandleFunc("GET /volunteer", apiHandler.GetVolunteerConfirmation)
+	router.HandleFunc("OPTIONS /volunteer", nullHandler)
+
 	router.HandleFunc("POST /admin/login", apiHandler.Login)
 	router.HandleFunc("OPTIONS /admin/login", nullHandler)
 	router.HandleFunc("GET /admin/token", apiHandler.RefreshToken)
@@ -33,6 +37,9 @@ func CreateRouter(db *DBHandler, admin *security.AdminData) http.Handler {
 	router.HandleFunc("OPTIONS /admin/user", nullHandler)
 	router.HandleFunc("GET /admin/emails", apiHandler.DownloadEmails)
 	router.HandleFunc("OPTIONS /admin/emails", nullHandler)
+	router.HandleFunc("GET /admin/volunteer", apiHandler.DownloadVolunteerEmails)
+	router.HandleFunc("DELETE /admin/volunteer", apiHandler.DeleteVolunteer)
+	router.HandleFunc("OPTIONS /admin/volunteer", nullHandler)
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("OK"))

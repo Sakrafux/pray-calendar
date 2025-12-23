@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -345,6 +346,98 @@ func (h *ApiHandler) DownloadEmails(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *ApiHandler) PostVolunteerRegistration(w http.ResponseWriter, r *http.Request) {
+	email := r.URL.Query().Get("email")
+	if !isValidEmail(email) {
+		http.Error(w, "Email is not well formed", http.StatusBadRequest)
+		return
+	}
+
+	volunteer, err := h.db.CreateVolunteer(email)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// TODO send confirmation email
+	log.Println(volunteer)
+
+	w.WriteHeader(http.StatusCreated)
+}
+
+func (h *ApiHandler) GetVolunteerConfirmation(w http.ResponseWriter, r *http.Request) {
+	email := r.URL.Query().Get("email")
+	if !isValidEmail(email) {
+		http.Error(w, "Email is not well formed", http.StatusBadRequest)
+		return
+	}
+
+	token := r.URL.Query().Get("token")
+
+	err := h.db.ConfirmVolunteer(email, token)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("E-Mail bestätigt"))
+}
+
+func (h *ApiHandler) DeleteVolunteer(w http.ResponseWriter, r *http.Request) {
+	if !isAdmin(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	email := r.URL.Query().Get("email")
+	if !isValidEmail(email) {
+		http.Error(w, "Email is not well formed", http.StatusBadRequest)
+		return
+	}
+
+	err := h.db.DeleteVolunteer(email)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *ApiHandler) DownloadVolunteerEmails(w http.ResponseWriter, r *http.Request) {
+	if !isAdmin(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	filename := "volunteer_emails.csv"
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+
+	writer := csv.NewWriter(w)
+	defer writer.Flush()
+
+	rows, err := h.db.GetVolunteerEmails()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	headers := []string{"Email"}
+	if err := writer.Write(headers); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, row := range rows {
+		if err := writer.Write(row); err != nil {
+			log.Println("Error writing row to CSV:", err)
+			return
+		}
+	}
+}
+
 func writeJson(w http.ResponseWriter, data any) {
 	b, err := json.Marshal(data)
 	if err != nil {
@@ -366,4 +459,9 @@ func isAdmin(r *http.Request) bool {
 		return err == nil
 	}
 	return false
+}
+
+func isValidEmail(email string) bool {
+	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	return emailRegex.MatchString(email)
 }

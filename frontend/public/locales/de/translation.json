@@ -18,7 +18,16 @@
         "image-no": "Bild nicht verfügbar",
         "link-calendar": "Zum Kalender",
         "paragraph-stpoelten": "TODO (St. Pölten spezifische Informationen) Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed iaculis sem elementum porttitor pellentesque. Morbi sollicitudin, felis sed sollicitudin cursus, urna urna scelerisque ex, eu luctus tellus dolor vitae orci. Sed ac cursus mi, at vehicula diam. Nullam egestas scelerisque tellus at feugiat. Nunc rutrum, enim non maximus efficitur, quam felis finibus metus, a cursus felis mi vitae lectus. Quisque egestas eget purus sed gravida. Phasellus id purus placerat, vestibulum sapien mattis, porta sem. Vivamus vel est efficitur, bibendum eros in, blandit justo.",
-        "paragraph-worship": "TODO (Allgemeine Informationen zu Anbetungen) Proin mauris odio, molestie eu consectetur eget, semper et eros. Mauris sem tellus, condimentum nec rutrum ut, finibus ac odio. Phasellus erat ante, eleifend ut lectus ut, tincidunt dapibus felis. Aliquam congue tincidunt massa, ut iaculis magna mattis eget. Duis dictum, enim vel sagittis sollicitudin, urna dui rutrum nibh, vitae dapibus felis nunc nec metus. Sed quis enim metus. Aliquam ac turpis et mauris imperdiet venenatis. Donec fermentum blandit ornare. Quisque aliquam nunc sit amet nisl accumsan posuere. Donec at convallis urna. Nulla in scelerisque nisi, eu molestie justo. Nunc iaculis purus nec euismod pharetra. In erat odio, vehicula maximus tristique at, bibendum in massa. Nulla accumsan ligula ut rhoncus sollicitudin. Duis sed feugiat dui, non congue ex. Phasellus porttitor efficitur bibendum. Morbi ex turpis, bibendum sed nisi sit amet, porttitor viverra enim. Praesent a molestie velit. Pellentesque cursus lobortis urna, eu facilisis tortor porttitor non. Donec pretium consectetur tellus. Sed aliquet cursus euismod."
+        "paragraph-worship": "TODO (Allgemeine Informationen zu Anbetungen) Proin mauris odio, molestie eu consectetur eget, semper et eros. Mauris sem tellus, condimentum nec rutrum ut, finibus ac odio. Phasellus erat ante, eleifend ut lectus ut, tincidunt dapibus felis. Aliquam congue tincidunt massa, ut iaculis magna mattis eget. Duis dictum, enim vel sagittis sollicitudin, urna dui rutrum nibh, vitae dapibus felis nunc nec metus. Sed quis enim metus. Aliquam ac turpis et mauris imperdiet venenatis. Donec fermentum blandit ornare. Quisque aliquam nunc sit amet nisl accumsan posuere. Donec at convallis urna. Nulla in scelerisque nisi, eu molestie justo. Nunc iaculis purus nec euismod pharetra. In erat odio, vehicula maximus tristique at, bibendum in massa. Nulla accumsan ligula ut rhoncus sollicitudin. Duis sed feugiat dui, non congue ex. Phasellus porttitor efficitur bibendum. Morbi ex turpis, bibendum sed nisi sit amet, porttitor viverra enim. Praesent a molestie velit. Pellentesque cursus lobortis urna, eu facilisis tortor porttitor non. Donec pretium consectetur tellus. Sed aliquet cursus euismod.",
+        "volunteer": {
+            "heading": "Registrierung für Benachrichtigungen",
+            "paragraph1": "Falls sich jemand kurzfristig (<24 Stunden) von einem Timeslot abmeldet, sollte dieser nach allen Möglichkeiten nachbesetzt werden. Für diesen Zweck kann man freiwillig seine E-Mail-Adresse für Benachrichtigungen registrieren. Man wird dementsprechend automatisch über den offenen Timeslot informiert und kann sich eintragen, um hier einzuspringen.",
+            "paragraph2": "Bei Registrierung erhält man in Kürze eine Bestätigungs-Mail, welche akzeptiert werden muss. Sollte man später Benachrichtigungen nicht mehr erhalten wollen, muss man sich per E-Mail bei $t(impressum.email) melden, um ausgetragen zu werden.",
+            "placeholder": "E-Mail",
+            "submit": "Registrieren",
+            "success-post": "E-Mail wurde versendet",
+            "error-post": "E-Mail konnte nicht registriert werden"
+        }
     },
     "calendar": {
         "page": {
@@ -105,6 +114,22 @@
             "query": "E-Mail-Adressen abrufen",
             "success-query": "E-Mail-Adressen wurden erfolgreich abgerufen",
             "error-query": "E-Mail-Adressen konnte nicht abgerufen werden"
+        },
+        "query-volunteer-emails": {
+            "heading": "Abfrage der E-Mail-Adressen für Benachrichtigungen",
+            "hint": "Abruf der E-Mail-Adressen die für automatische Benachrichtigungen angemeldet sind",
+            "hint2": "Die Adressen werden als .csv-Datei abgerufen",
+            "query": "$t(admin.query-emails.query)",
+            "success-query": "$t(admin.query-emails.success-query)",
+            "error-query": "$t(admin.query-emails.error-query)"
+        },
+        "volunteer": {
+            "heading": "Abmelden von E-Mail-Adressen für Benachrichtigungen",
+            "hint": "Meldet die gegebene E-Mail von automatisierten Benachrichtigungen ab",
+            "email": "E-Mail",
+            "submit": "Abmelden",
+            "success-delete": "E-Mail wurde abgemeldet",
+            "error-delete": "E-Mail konnte nicht abgemeldet werden"
         },
         "logout": "Abmelden"
     },

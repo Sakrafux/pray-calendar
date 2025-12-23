@@ -27,3 +27,10 @@ type SeriesRequest struct {
 	Series Series
 	Entry  CalendarEntryFull
 }
+
+type Volunteer struct {
+	Id                int
+	Email             string
+	Confirmed         bool
+	ConfirmationToken string
+}

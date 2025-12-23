@@ -9,29 +9,20 @@ import { useToast } from "@/components/Toast/ToastProvider";
 import { downloadAsFile } from "@/util/file";
 
 function Admin() {
-    const navigate = useNavigate();
     const { t } = useTranslation();
-    const { logout } = useAuth();
 
     return (
         <main className="text-container p-6 shadow-md">
             <h1 className="mb-4 text-2xl font-bold">{t("admin.heading")}</h1>
             <DeleteUser />
+            <br />
             <QueryEmails />
-
-            <div className="mt-6 w-full space-y-4 bg-white p-6 shadow-md">
-                <h2 className="text-xl font-semibold">{t("admin.logout")}</h2>
-                <button
-                    type="submit"
-                    className="cursor-pointer bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 active:bg-blue-700"
-                    onClick={async () => {
-                        await logout();
-                        navigate("/");
-                    }}
-                >
-                    {t("admin.logout")}
-                </button>
-            </div>
+            <br />
+            <QueryVolunteerEmails />
+            <br />
+            <DeleteVolunteer />
+            <br />
+            <Logout />
         </main>
     );
 }
@@ -65,7 +56,12 @@ function DeleteUser() {
                     email: formData.email,
                 },
             });
-            showToast("success", t("admin.userdata.success-delete"));
+            setFormData({
+                firstName: "",
+                lastName: "",
+                email: "",
+            });
+            showToast("success", t("admin.userdata.success-delete"), 5000);
         } catch (error) {
             showToast("error", `${t("admin.userdata.error-delete")}: ${(error as Error).message}`);
         }
@@ -73,7 +69,10 @@ function DeleteUser() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="w-full space-y-4 bg-white p-6 shadow-md">
+        <form
+            onSubmit={handleSubmit}
+            className="w-full space-y-4 bg-white p-6 shadow-[0_0_20px_rgba(0,0,0,0.15)]"
+        >
             <h2 className="text-xl font-semibold">{t("admin.userdata.heading")}</h2>
             <h3 className="mt-[-0.75rem] text-gray-400">{t("admin.userdata.hint")}</h3>
             <h3 className="mt-[-0.75rem] text-gray-400">{t("admin.userdata.hint2")}</h3>
@@ -167,14 +166,17 @@ function QueryEmails() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="mt-6 w-full space-y-4 bg-white p-6 shadow-md">
+        <form
+            onSubmit={handleSubmit}
+            className="w-full space-y-4 bg-white p-6 shadow-[0_0_20px_rgba(0,0,0,0.15)]"
+        >
             <h2 className="text-xl font-semibold">{t("admin.query-emails.heading")}</h2>
             <h3 className="mt-[-0.75rem] text-gray-400">{t("admin.query-emails.hint")}</h3>
             <h3 className="mt-[-0.75rem] text-gray-400">{t("admin.query-emails.hint2")}</h3>
 
             <div>
                 <label className="block text-sm font-medium">
-                    {t("admin.query-emails.heading")}
+                    {t("admin.query-emails.radio-heading")}
                 </label>
                 <div className="mt-1 flex gap-4">
                     <label className="flex items-center gap-2">
@@ -227,6 +229,128 @@ function QueryEmails() {
                 {t("admin.query-emails.query")}
             </button>
         </form>
+    );
+}
+
+function QueryVolunteerEmails() {
+    const { t } = useTranslation();
+    const api = useApi();
+    const { showToast } = useToast();
+    const { showLoading, hideLoading } = useLoading();
+
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+
+        showLoading();
+        try {
+            const csvFile = await api.get<string>("/admin/volunteer");
+            downloadAsFile(csvFile.data, "volunteer_emails.csv");
+            showToast("success", t("admin.query-volunteer-emails.success-query"), 5000);
+        } catch (error) {
+            showToast(
+                "error",
+                `${t("admin.query-volunteer-emails.error-query")}: ${(error as Error).message}`,
+            );
+        }
+        hideLoading();
+    };
+
+    return (
+        <form
+            onSubmit={handleSubmit}
+            className="w-full space-y-4 bg-white p-6 shadow-[0_0_20px_rgba(0,0,0,0.15)]"
+        >
+            <h2 className="text-xl font-semibold">{t("admin.query-volunteer-emails.heading")}</h2>
+            <h3 className="mt-[-0.75rem] text-gray-400">
+                {t("admin.query-volunteer-emails.hint")}
+            </h3>
+            <h3 className="mt-[-0.75rem] text-gray-400">
+                {t("admin.query-volunteer-emails.hint2")}
+            </h3>
+
+            <button
+                type="submit"
+                className="cursor-pointer bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 active:bg-blue-700"
+            >
+                {t("admin.query-volunteer-emails.query")}
+            </button>
+        </form>
+    );
+}
+
+function DeleteVolunteer() {
+    const [email, setEmail] = useState("");
+
+    const { t } = useTranslation();
+    const api = useApi();
+    const { showToast } = useToast();
+    const { showLoading, hideLoading } = useLoading();
+
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+
+        showLoading();
+        try {
+            await api.delete("/admin/volunteer", { params: { email } });
+            setEmail("");
+            showToast("success", t("admin.volunteer.success-delete"), 5000);
+        } catch (error) {
+            showToast("error", `${t("admin.volunteer.error-delete")}: ${(error as Error).message}`);
+        }
+        hideLoading();
+    };
+
+    return (
+        <form
+            onSubmit={handleSubmit}
+            className="w-full space-y-4 bg-white p-6 shadow-[0_0_20px_rgba(0,0,0,0.15)]"
+        >
+            <h2 className="text-xl font-semibold">{t("admin.volunteer.heading")}</h2>
+            <h3 className="mt-[-0.75rem] text-gray-400">{t("admin.volunteer.hint")}</h3>
+
+            <div>
+                <label className="mb-1 block text-sm font-medium">
+                    {t("admin.volunteer.email")}
+                </label>
+                <input
+                    type="email"
+                    name="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full border p-2 focus:ring-2 focus:ring-blue-500"
+                    required
+                />
+            </div>
+
+            <button
+                type="submit"
+                className="cursor-pointer bg-red-500 px-4 py-2 text-white hover:bg-red-600 active:bg-red-700"
+            >
+                {t("admin.volunteer.submit")}
+            </button>
+        </form>
+    );
+}
+
+function Logout() {
+    const navigate = useNavigate();
+    const { t } = useTranslation();
+    const { logout } = useAuth();
+
+    return (
+        <div className="w-full space-y-4 bg-white p-6 shadow-[0_0_20px_rgba(0,0,0,0.15)]">
+            <h2 className="text-xl font-semibold">{t("admin.logout")}</h2>
+            <button
+                type="submit"
+                className="cursor-pointer bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 active:bg-blue-700"
+                onClick={async () => {
+                    await logout();
+                    navigate("/");
+                }}
+            >
+                {t("admin.logout")}
+            </button>
+        </div>
     );
 }
 

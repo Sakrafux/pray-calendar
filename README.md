@@ -63,4 +63,8 @@ This makes the entire application self-contained, requiring only Docker to run.
 - [x] Querying email addresses for admin purposes (recent emails, all emails)
 - [ ] Additional volunteer email list for short term cancellation (ideally automated emails)
   - https://resend.com/home
+  - [x] Volunteer registration on home page
+  - [x] Admin function to remove volunteer
+  - [ ] Send confirmation email to volunteer on registration
+  - [ ] Send email on cancellation
 - [ ] Fill missing information (TODOs)

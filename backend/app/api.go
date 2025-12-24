@@ -31,7 +31,7 @@ func (h *ApiHandler) GetAllEntries(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if isAdmin(r) {
+	if r.Context().Value("admin").(bool) {
 		entries, err := h.db.GetAllFullEntriesForWeek(startTime)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -175,7 +175,7 @@ func (h *ApiHandler) DeleteEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if isAdmin(r) {
+	if r.Context().Value("admin").(bool) {
 		err = h.db.DeleteEntryAdmin(id)
 	} else {
 		email := r.URL.Query().Get("email")
@@ -200,7 +200,7 @@ func (h *ApiHandler) DeleteSeries(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if isAdmin(r) {
+	if r.Context().Value("admin").(bool) {
 		err = h.db.DeleteSeriesAdmin(id)
 	} else {
 		email := r.URL.Query().Get("email")
@@ -219,7 +219,7 @@ func (h *ApiHandler) DeleteSeries(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ApiHandler) DeleteUserData(w http.ResponseWriter, r *http.Request) {
-	if !isAdmin(r) {
+	if !r.Context().Value("admin").(bool) {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
@@ -310,11 +310,6 @@ func (h *ApiHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ApiHandler) DownloadEmails(w http.ResponseWriter, r *http.Request) {
-	if !isAdmin(r) {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
-	}
-
 	interval := r.URL.Query().Get("interval")
 	if interval == "" {
 		interval = "30days"
@@ -386,11 +381,6 @@ func (h *ApiHandler) GetVolunteerConfirmation(w http.ResponseWriter, r *http.Req
 }
 
 func (h *ApiHandler) DeleteVolunteer(w http.ResponseWriter, r *http.Request) {
-	if !isAdmin(r) {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
-	}
-
 	email := r.URL.Query().Get("email")
 	if !isValidEmail(email) {
 		http.Error(w, "Email is not well formed", http.StatusBadRequest)
@@ -407,11 +397,6 @@ func (h *ApiHandler) DeleteVolunteer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ApiHandler) DownloadVolunteerEmails(w http.ResponseWriter, r *http.Request) {
-	if !isAdmin(r) {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
-	}
-
 	filename := "volunteer_emails.csv"
 	w.Header().Set("Content-Type", "text/csv")
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
@@ -449,17 +434,6 @@ func writeJson(w http.ResponseWriter, data any) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-}
-
-func isAdmin(r *http.Request) bool {
-	auth := r.Header.Get("Authorization")
-	tokenString := ""
-	if len(auth) > 7 && auth[:7] == "Bearer " {
-		tokenString = auth[7:]
-		_, err := security.ValidateAccessToken(tokenString)
-		return err == nil
-	}
-	return false
 }
 
 func isValidEmail(email string) bool {

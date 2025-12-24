@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"os"
@@ -37,6 +38,7 @@ func CreateRouter(db *DBHandler, admin *security.AdminData) http.Handler {
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))
+	router.Use(Authentication)
 
 	apiHandler := NewApiHandler(db, admin)
 
@@ -56,6 +58,7 @@ func CreateRouter(db *DBHandler, admin *security.AdminData) http.Handler {
 		})
 
 		router.Route("/admin", func(r chi.Router) {
+			r.Use(AdminOnly)
 			r.Post("/login", apiHandler.Login)
 			r.Get("/token", apiHandler.RefreshToken)
 			r.Delete("/user", apiHandler.DeleteUserData)
@@ -68,6 +71,47 @@ func CreateRouter(db *DBHandler, admin *security.AdminData) http.Handler {
 	router.Handle("/*", NewFrontendSpaHandler())
 
 	return router
+}
+
+func Authentication(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		auth := r.Header.Get("Authorization")
+
+		if auth == "" {
+			ctx := context.WithValue(r.Context(), "admin", false)
+			httplog.LogEntrySetField(ctx, "admin", slog.BoolValue(false))
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+
+		if len(auth) <= 7 || auth[:7] != "Bearer " {
+			http.Error(w, "Unauthorized: Missing or invalid token format", http.StatusUnauthorized)
+			return
+		}
+
+		tokenString := auth[7:]
+
+		_, err := security.ValidateAccessToken(tokenString)
+		if err != nil {
+			http.Error(w, "Unauthorized: Invalid access token", http.StatusUnauthorized)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "admin", true)
+		httplog.LogEntrySetField(ctx, "admin", slog.BoolValue(true))
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func AdminOnly(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !r.Context().Value("admin").(bool) {
+			http.Error(w, "Unauthorized: Admin permissions required", http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 type FrontendSpaHandler struct {

@@ -1,68 +1,73 @@
 package app
 
 import (
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
-	"github.com/Sakrafux/pray-calendar/backend/middleware"
 	"github.com/Sakrafux/pray-calendar/backend/security"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+	"github.com/go-chi/httplog/v2"
 )
 
 func CreateRouter(db *DBHandler, admin *security.AdminData) http.Handler {
-	router := http.NewServeMux()
+
+	logger := httplog.NewLogger("prayer-calendar", httplog.Options{
+		LogLevel:        slog.LevelInfo,
+		JSON:            false,
+		Concise:         true,
+		TimeFieldFormat: time.RFC3339,
+	})
+
+	router := chi.NewRouter()
+	router.Use(middleware.RequestID)
+	router.Use(middleware.RealIP)
+	router.Use(httplog.RequestLogger(logger))
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.Timeout(60 * time.Second))
+	router.Use(middleware.Heartbeat("/health"))
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
 
 	apiHandler := NewApiHandler(db, admin)
 
-	router.HandleFunc("GET /calendar/entries", apiHandler.GetAllEntries)
-	router.HandleFunc("POST /calendar/entries", apiHandler.PostEntry)
-	router.HandleFunc("OPTIONS /calendar/entries", nullHandler)
-	router.HandleFunc("DELETE /calendar/entries/{id}", apiHandler.DeleteEntry)
-	router.HandleFunc("OPTIONS /calendar/entries/{id}", nullHandler)
+	router.Route("/api", func(router chi.Router) {
+		router.Route("/calendar", func(r chi.Router) {
+			r.Get("/entries", apiHandler.GetAllEntries)
+			r.Post("/entries", apiHandler.PostEntry)
+			r.Delete("/entries/{id}", apiHandler.DeleteEntry)
 
-	router.HandleFunc("POST /calendar/series", apiHandler.PostSeries)
-	router.HandleFunc("OPTIONS /calendar/series", nullHandler)
-	router.HandleFunc("DELETE /calendar/series/{id}", apiHandler.DeleteSeries)
-	router.HandleFunc("OPTIONS /calendar/series/{id}", nullHandler)
+			r.Post("/series", apiHandler.PostSeries)
+			r.Delete("/series/{id}", apiHandler.DeleteSeries)
+		})
 
-	router.HandleFunc("POST /volunteer", apiHandler.PostVolunteerRegistration)
-	router.HandleFunc("GET /volunteer", apiHandler.GetVolunteerConfirmation)
-	router.HandleFunc("OPTIONS /volunteer", nullHandler)
+		router.Route("/volunteer", func(r chi.Router) {
+			r.Post("/", apiHandler.PostVolunteerRegistration)
+			r.Get("/confirmation", apiHandler.GetVolunteerConfirmation)
+		})
 
-	router.HandleFunc("POST /admin/login", apiHandler.Login)
-	router.HandleFunc("OPTIONS /admin/login", nullHandler)
-	router.HandleFunc("GET /admin/token", apiHandler.RefreshToken)
-	router.HandleFunc("OPTIONS /admin/token", nullHandler)
-	router.HandleFunc("DELETE /admin/user", apiHandler.DeleteUserData)
-	router.HandleFunc("OPTIONS /admin/user", nullHandler)
-	router.HandleFunc("GET /admin/emails", apiHandler.DownloadEmails)
-	router.HandleFunc("OPTIONS /admin/emails", nullHandler)
-	router.HandleFunc("GET /admin/volunteer", apiHandler.DownloadVolunteerEmails)
-	router.HandleFunc("DELETE /admin/volunteer", apiHandler.DeleteVolunteer)
-	router.HandleFunc("OPTIONS /admin/volunteer", nullHandler)
-
-	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte("OK"))
+		router.Route("/admin", func(r chi.Router) {
+			r.Post("/login", apiHandler.Login)
+			r.Get("/token", apiHandler.RefreshToken)
+			r.Delete("/user", apiHandler.DeleteUserData)
+			r.Get("/emails", apiHandler.DownloadEmails)
+			r.Get("/volunteer", apiHandler.DownloadVolunteerEmails)
+			r.Delete("/volunteer", apiHandler.DeleteVolunteer)
+		})
 	})
 
-	routerWrapper := http.NewServeMux()
-	routerWrapper.Handle("/api/", http.StripPrefix("/api", router))
-	routerWrapper.Handle("/", NewFrontendSpaHandler())
+	router.Handle("/*", NewFrontendSpaHandler())
 
-	return wrapMiddleware(routerWrapper)
-}
-
-func wrapMiddleware(handler http.Handler) http.Handler {
-	stack := middleware.CreateStack(
-		middleware.Logging,
-		middleware.Cors,
-	)
-
-	return stack(handler)
-}
-
-func nullHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNoContent)
+	return router
 }
 
 type FrontendSpaHandler struct {

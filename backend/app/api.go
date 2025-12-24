@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Sakrafux/pray-calendar/backend/security"
+	"github.com/go-chi/chi/v5"
 )
 
 type ApiHandler struct {
@@ -168,7 +169,7 @@ func (h *ApiHandler) PostSeries(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ApiHandler) DeleteEntry(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -193,7 +194,7 @@ func (h *ApiHandler) DeleteEntry(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ApiHandler) DeleteSeries(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

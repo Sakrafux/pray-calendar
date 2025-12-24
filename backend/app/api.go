@@ -378,7 +378,10 @@ func (h *ApiHandler) GetVolunteerConfirmation(w http.ResponseWriter, r *http.Req
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("E-Mail bestätigt"))
+	_, err = w.Write([]byte("E-Mail bestätigt"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (h *ApiHandler) DeleteVolunteer(w http.ResponseWriter, r *http.Request) {

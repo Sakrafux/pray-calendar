@@ -61,10 +61,11 @@ func CreateRouter(db *DBHandler, admin *security.AdminData) http.Handler {
 
 		router.Route("/admin", func(r chi.Router) {
 			r.Post("/login", apiHandler.Login)
+			r.Get("/token", apiHandler.RefreshToken)
+
 			r.Group(func(r chi.Router) {
 				r.Use(AdminOnly)
 
-				r.Get("/token", apiHandler.RefreshToken)
 				r.Delete("/user", apiHandler.DeleteUserData)
 				r.Get("/emails", apiHandler.DownloadEmails)
 

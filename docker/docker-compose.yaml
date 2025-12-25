@@ -11,8 +11,9 @@ services:
         VITE_API_BASE_URL: /api
         VITE_FEATURE_VOLUNTEER_LIST: true
     environment:
-      - HOST=http://localhost:8080
       - PORT=8080
+      - HOST_BE=http://localhost:8080
+      - HOST_FE=http://localhost:5173
       - DB_PATH=./db/data.db
       - ADMIN_NAME=admin
       - ADMIN_PASSWORD=admin

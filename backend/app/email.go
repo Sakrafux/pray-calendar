@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/resend/resend-go/v2"
 )
@@ -34,6 +35,44 @@ func sendConfirmationEmail(email, confirmationLink string) error {
 				<p style="font-size: 12px; color: #7f8c8d;">Falls das ein Fehler war, ignorieren Sie diese E-Mail einfach.</p>
 			</div>
 		`, confirmationLink),
+	}
+
+	_, err := client.Emails.Send(params)
+	return err
+}
+
+func sendNotificationEmail(emails []string, start, end time.Time) error {
+	client := resend.NewClient(os.Getenv("RESEND_API_KEY"))
+
+	calendarLink := fmt.Sprintf("%s/calendar", os.Getenv("HOST_FE"))
+	dateStr := start.Format("02.01.2006")
+	startTimeStr := start.Format("15:04")
+	endTimeStr := end.Format("15:04")
+
+	params := &resend.SendEmailRequest{
+		// TODO replace with real domain email
+		From: "onboarding@resend.dev",
+		// TODO replace with `emails`
+		To:      []string{"andhell03@gmail.com"},
+		Subject: fmt.Sprintf("Ausfall am %s um %s-%s - 24/7 Anbetung St. Pölten", dateStr, startTimeStr, endTimeStr),
+		Html: fmt.Sprintf(`
+			<div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eeeeee; border-radius: 8px;">
+				<h2 style="color: #c0392b; border-bottom: 2px solid #c0392b; padding-bottom: 10px;">Ausfall am %s um %s-%s</h2>
+				<p style="font-weight: bold; color: #2c3e50;">24/7 Anbetung St. Pölten</p>
+				
+				<p style="text-align: justify;">Jemand hat sich kurzfristig vom Timeslot am %s für <strong>%s bis %s</strong> abgemeldet.</p>
+				
+				<p style="text-align: justify;">Falls du einspringen kannst, melde dich bitte im Kalender an:</p>
+				
+				<div style="text-align: center; margin: 30px 0;">
+					<a href="%s" style="background-color: #2c3e50; color: #ffffff; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Zum Kalender</a>
+				</div>
+				
+				<hr style="border: 0; border-top: 1px solid #eeeeee; margin-top: 30px;">
+				
+				<p style="font-size: 12px; color: #7f8c8d;">Vielen Dank für deinen wertvollen Dienst in der Anbetung!</p>
+			</div>
+		`, dateStr, startTimeStr, endTimeStr, dateStr, startTimeStr, endTimeStr, calendarLink),
 	}
 
 	_, err := client.Emails.Send(params)

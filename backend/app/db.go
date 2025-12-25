@@ -193,6 +193,52 @@ func (h *DBHandler) InsertSeries(series Series) (*Series, error) {
 	return &newSeries, nil
 }
 
+func (h *DBHandler) GetEntry(id int) (*CalendarEntry, error) {
+	rows, err := h.db.Query(`
+		SELECT id, firstname, starttime, endtime, admin_event, series_id FROM calendar_entries
+		WHERE id = $1
+		ORDER BY starttime ASC
+	`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, fmt.Errorf("no entry found")
+	}
+
+	var entry CalendarEntry
+	if err := rows.Scan(&entry.Id, &entry.FirstName, &entry.Start, &entry.End, &entry.AdminEvent, &entry.SeriesId); err != nil {
+		return nil, err
+	}
+
+	return &entry, nil
+}
+
+func (h *DBHandler) GetSeriesEntries(seriesId int) ([]CalendarEntry, error) {
+	rows, err := h.db.Query(`
+		SELECT id, firstname, starttime, endtime, admin_event, series_id FROM calendar_entries
+		WHERE series_id = $1
+		ORDER BY starttime ASC
+	`, seriesId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	entries := make([]CalendarEntry, 0)
+	for rows.Next() {
+		var entry CalendarEntry
+		if err := rows.Scan(&entry.Id, &entry.FirstName, &entry.Start, &entry.End, &entry.AdminEvent, &entry.SeriesId); err != nil {
+			return nil, err
+		}
+		entries = append(entries, entry)
+	}
+
+	return entries, nil
+}
+
 func (h *DBHandler) DeleteEntry(id int, email string) error {
 	res, err := h.db.Exec("DELETE FROM calendar_entries WHERE id = $1 AND email = $2", id, email)
 	if err != nil {
@@ -371,7 +417,7 @@ func (h *DBHandler) DeleteVolunteer(email string) error {
 	return nil
 }
 
-func (h *DBHandler) GetVolunteerEmails() ([][]string, error) {
+func (h *DBHandler) GetVolunteerEmails() ([]string, error) {
 	rows, err := h.db.Query(`
         SELECT email
         FROM volunteers
@@ -382,7 +428,7 @@ func (h *DBHandler) GetVolunteerEmails() ([][]string, error) {
 	}
 	defer rows.Close()
 
-	var results [][]string
+	var results []string
 	for rows.Next() {
 		var email string
 
@@ -390,7 +436,7 @@ func (h *DBHandler) GetVolunteerEmails() ([][]string, error) {
 			return nil, err
 		}
 
-		results = append(results, []string{email})
+		results = append(results, email)
 	}
 
 	return results, nil

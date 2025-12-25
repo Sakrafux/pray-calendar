@@ -177,6 +177,11 @@ func (h *ApiHandler) DeleteEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	entry, err := h.db.GetEntry(id)
+	if err != nil {
+		httpErrorWithLog(r, w, err.Error(), http.StatusNotFound)
+	}
+
 	if r.Context().Value("admin").(bool) {
 		err = h.db.DeleteEntryAdmin(id)
 	} else {
@@ -192,6 +197,26 @@ func (h *ApiHandler) DeleteEntry(w http.ResponseWriter, r *http.Request) {
 		httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	if os.Getenv("FEATURE_VOLUNTEER_LIST") == "true" {
+		emails, err := h.db.GetVolunteerEmails()
+		if err != nil {
+			httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		now := time.Now()
+		threeDaysFromNow := now.AddDate(0, 0, 3)
+
+		if entry.Start.After(now) && entry.Start.Before(threeDaysFromNow) {
+			err := sendNotificationEmail(emails, entry.Start, entry.End)
+			if err != nil {
+				httpErrorWithLog(r, w, err.Error(), http.StatusServiceUnavailable)
+				return
+			}
+		}
+	}
+
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -200,6 +225,11 @@ func (h *ApiHandler) DeleteSeries(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		httpErrorWithLog(r, w, err.Error(), http.StatusBadRequest)
 		return
+	}
+
+	entries, err := h.db.GetSeriesEntries(id)
+	if err != nil {
+		httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
 	}
 
 	if r.Context().Value("admin").(bool) {
@@ -217,6 +247,28 @@ func (h *ApiHandler) DeleteSeries(w http.ResponseWriter, r *http.Request) {
 		httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	if os.Getenv("FEATURE_VOLUNTEER_LIST") == "true" {
+		emails, err := h.db.GetVolunteerEmails()
+		if err != nil {
+			httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		now := time.Now()
+		threeDaysFromNow := now.AddDate(0, 0, 3)
+
+		for _, entry := range entries {
+			if entry.Start.After(now) && entry.Start.Before(threeDaysFromNow) {
+				err := sendNotificationEmail(emails, entry.Start, entry.End)
+				if err != nil {
+					httpErrorWithLog(r, w, err.Error(), http.StatusServiceUnavailable)
+					return
+				}
+			}
+		}
+	}
+
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -357,7 +409,7 @@ func (h *ApiHandler) PostVolunteerRegistration(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	confirmationLink := fmt.Sprintf("%s/api/volunteer/confirmation?email=%s&token=%s", os.Getenv("HOST"), email, volunteer.ConfirmationToken)
+	confirmationLink := fmt.Sprintf("%s/api/volunteer/confirmation?email=%s&token=%s", os.Getenv("HOST_BE"), email, volunteer.ConfirmationToken)
 
 	if err = sendConfirmationEmail(email, confirmationLink); err != nil {
 		httpErrorWithLog(r, w, err.Error(), http.StatusServiceUnavailable)
@@ -412,7 +464,7 @@ func (h *ApiHandler) DownloadVolunteerEmails(w http.ResponseWriter, r *http.Requ
 	writer := csv.NewWriter(w)
 	defer writer.Flush()
 
-	rows, err := h.db.GetVolunteerEmails()
+	emails, err := h.db.GetVolunteerEmails()
 	if err != nil {
 		httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
 		return
@@ -422,6 +474,11 @@ func (h *ApiHandler) DownloadVolunteerEmails(w http.ResponseWriter, r *http.Requ
 	if err := writer.Write(headers); err != nil {
 		httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	rows := make([][]string, 0)
+	for _, email := range emails {
+		rows = append(rows, []string{email})
 	}
 
 	for _, row := range rows {

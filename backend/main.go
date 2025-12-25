@@ -1,9 +1,9 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/Sakrafux/pray-calendar/backend/app"
 	"github.com/Sakrafux/pray-calendar/backend/security"
@@ -11,25 +11,24 @@ import (
 )
 
 func main() {
-	dbPath := flag.String("db-path", "./example.db", "Path to sqlite database file")
-	port := flag.String("port", "8080", "Port to expose")
-	adminName := flag.String("admin-name", "admin", "Admin name")
-	adminPassword := flag.String("admin-password", "admin", "Admin password")
-	flag.Parse()
-
 	_ = godotenv.Load()
 
-	db := app.NewDBHandler(*dbPath)
+	dbPath := os.Getenv("DB_PATH")
+	port := os.Getenv("PORT")
+	adminName := os.Getenv("ADMIN_NAME")
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+
+	db := app.NewDBHandler(dbPath)
 	defer db.Close()
 	db.Setup()
 
-	admin := &security.AdminData{Username: *adminName, Password: *adminPassword}
+	admin := &security.AdminData{Username: adminName, Password: adminPassword}
 
 	server := http.Server{
-		Addr:    ":" + *port,
+		Addr:    ":" + port,
 		Handler: app.CreateRouter(db, admin),
 	}
 
-	log.Println("Listening on " + *port + "...")
+	log.Println("Listening on " + port + "...")
 	log.Fatal(server.ListenAndServe())
 }

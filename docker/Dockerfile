@@ -39,4 +39,4 @@ COPY --from=builder-fe /app/dist ./frontend
 EXPOSE 8080
 
 # Default command: run webserver
-ENTRYPOINT ["./webserver", "--port", "8080"]
+ENTRYPOINT ["./webserver"]

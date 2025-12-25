@@ -9,7 +9,13 @@ services:
       args:
         VITE_BASE: /
         VITE_API_BASE_URL: /api
-    command: ["--db-path", "./db/data.db", "--admin-name", "admin", "--admin-password", "admin"]
+    environment:
+      - HOST=http://localhost:8080
+      - PORT=8080
+      - DB_PATH=./db/data.db
+      - ADMIN_NAME=admin
+      - ADMIN_PASSWORD=admin
+      - RESEND_API_KEY=some-api-key
     ports:
       - "8080:8080"
     volumes:

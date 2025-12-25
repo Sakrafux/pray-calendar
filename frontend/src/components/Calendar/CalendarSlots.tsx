@@ -17,6 +17,11 @@ type CalendarSlotsProps = {
     onSlotClick: (date: string, time: number) => void;
 };
 
+/**
+ * This component represents the actual table or calendar.
+ *
+ * For greater layout flexibility, we use &lt;div&gt; instead of table.
+ */
 function CalendarSlots({ startOfWeek, days, onSlotClick }: CalendarSlotsProps) {
     const [events, setEvents] = useState<CalendarEntryExtDto[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<CalendarEntryExtDto>();
@@ -59,11 +64,13 @@ function CalendarSlots({ startOfWeek, days, onSlotClick }: CalendarSlotsProps) {
                                   ? "bg-orange-500 hover:bg-orange-600 active:bg-orange-700"
                                   : "bg-blue-500 hover:bg-blue-600 active:bg-blue-700";
 
+                            // We presuppose that only our approved events can and will be entered, as they have corresponding strings
                             const eventName = event.AdminEvent
                                 ? t(`calendar.modal-new.admin-event-${event.AdminEvent}`)
                                 : `${event.FirstName} ${event.LastName ?? ""}`;
 
                             if (event.slots === 1) {
+                                // If we only cover a single slot, we need a compact design
                                 eventDiv = (
                                     <div
                                         className={`absolute inset-1 z-10 flex cursor-pointer items-center p-2 text-left text-xs text-white shadow ${color}`}
@@ -78,6 +85,7 @@ function CalendarSlots({ startOfWeek, days, onSlotClick }: CalendarSlotsProps) {
                                     </div>
                                 );
                             } else {
+                                // Otherwise, we have plenty of space, but need to cover all the slots visually
                                 eventDiv = (
                                     <div
                                         className={`absolute inset-1 z-10 flex cursor-pointer flex-col p-2 text-left text-xs text-white shadow ${color}`}
@@ -136,6 +144,7 @@ function CalendarSlots({ startOfWeek, days, onSlotClick }: CalendarSlotsProps) {
                     })}
                 </React.Fragment>
             ))}
+            {/* Show a modal with information when clicking on an entry element and provide a delete option */}
             <CalendarSlotDetails
                 event={selectedEvent}
                 onClose={() => setSelectedEvent(undefined)}

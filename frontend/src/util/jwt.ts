@@ -1,3 +1,7 @@
+/**
+ * Parses an JWT token and provides its components. As an JWT is not encrypted and simply encoded for
+ * transfer, this is easily done without any secrets.
+ */
 export function parseJwt(token: string) {
     const [headerB64, payloadB64, signatureB64] = token.split(".");
     if (!headerB64 || !payloadB64 || !signatureB64) {

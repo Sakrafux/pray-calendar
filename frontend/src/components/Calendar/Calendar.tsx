@@ -10,6 +10,15 @@ import { useLoading } from "@/components/LoadingProvider";
 import type { CalendarEntryDto, Series } from "@/types";
 import { addDays, startOfWeek } from "@/util/date";
 
+/**
+ * This object defines styles at different times of the animation life cycle. As the animation
+ * changes from one set of values to the other, they should have the same attributes at each stage.
+ * However, those keys are not prescribed and simply identify a set of style properties. It only matters
+ * that those keys are later referred to.
+ *
+ * A callback can be used instead of a simple object to make use of additional information.
+ * The parameter `direction` is injected via the `custom` attribute of the `motion.div`.
+ */
 const variants = {
     enter: (direction: number) => ({
         x: direction > 0 ? 300 : -300, // enter from right or left
@@ -17,11 +26,17 @@ const variants = {
     }),
     center: { x: 0, opacity: 1 },
     exit: (direction: number) => ({
-        x: direction > 0 ? -300 : 300, // exit opposite
+        x: direction > 0 ? -300 : 300, // exit via the opposite side
         opacity: 0,
     }),
 };
 
+/**
+ * This component provides a calendar spanning a week. It allows for both the creation and
+ * viewing of calendar entries.
+ *
+ * Due to the requirements, 1 hour slots are both sufficient for the domain and ideal for UI purposes.
+ */
 export default function WeeklyCalendar() {
     const [currentWeekStart, setCurrentWeekStart] = useState<Date>(startOfWeek(new Date()));
     const [direction, setDirection] = useState(0); // 1 = next, -1 = prev
@@ -71,12 +86,17 @@ export default function WeeklyCalendar() {
 
     useEffect(() => {
         const searchDate = currentWeekStart.toISOString().split("T")[0];
+        // Only query new entries, if we have not already cached the information, and we aren't currently loading
+        // While we could possibly have stale entries, our use case requires no concurrency and
+        // in the worst case, wrong entries are caught by the backend anyway
         if (!state.data?.[searchDate] && !state.loading && !state.error) {
             showLoading(true);
             getAllCalendarEntries(searchDate).then(() => hideLoading());
         }
     }, [currentWeekStart, getAllCalendarEntries, hideLoading, showLoading, state]);
 
+    // When switching weeks, apply the latest scroll position, to keep the screen/table at the same position
+    // Otherwise, this leads to an irritating user experience
     useEffect(() => {
         if (tableRef.current) {
             tableRef.current.scrollTop = tableScrollRef.current.scrollTop;
@@ -87,6 +107,7 @@ export default function WeeklyCalendar() {
     return (
         <div className="flex w-full flex-row">
             <div className="full-wo-header-height flex flex-1 flex-col p-4">
+                {/* Desktop Layout */}
                 <div className="hidden h-12 flex-shrink-0 items-center justify-between pb-4 md:flex">
                     <div className="flex w-[200px] flex-shrink-0"></div>
                     <div className="flex flex-1 justify-center gap-4">
@@ -132,6 +153,7 @@ export default function WeeklyCalendar() {
                     </div>
                 </div>
 
+                {/* Mobile Layout */}
                 <div className="flex items-center justify-between gap-4 pb-4 md:hidden">
                     <button
                         onClick={prevWeek}
@@ -165,13 +187,15 @@ export default function WeeklyCalendar() {
                         <motion.div
                             ref={tableRef}
                             key={currentWeekStart.toISOString()} // important: triggers AnimatePresence
-                            custom={direction}
-                            variants={variants}
+                            custom={direction} // provide information to the variants
+                            variants={variants} // apply the different variants
+                            // call the different variants at different life cycle stages
                             initial="enter"
                             animate="center"
                             exit="exit"
                             transition={{ duration: 0.4, ease: "easeInOut" }}
                             className="absolute grid h-full w-full grid-cols-[100px_repeat(7,minmax(150px,1fr))] overflow-y-auto border border-gray-400"
+                            // capture the current scroll position
                             onScroll={(e) => {
                                 const target = e.target as HTMLDivElement;
                                 tableScrollRef.current.scrollTop = target.scrollTop;
@@ -194,6 +218,7 @@ export default function WeeklyCalendar() {
                                 </div>
                             ))}
 
+                            {/* The actual calendar body */}
                             <CalendarSlots
                                 startOfWeek={currentWeekStart}
                                 days={days}
@@ -219,6 +244,7 @@ export default function WeeklyCalendar() {
                     </button>
                 </div>
             </div>
+            {/* Creating a new time slot opens a modal */}
             <div className="hidden md:block">
                 <CalendarSlotNew
                     open={newEntryModal}

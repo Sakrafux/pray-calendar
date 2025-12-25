@@ -26,6 +26,7 @@ function Faq() {
             <p>{t("faq.data-removal")}</p>
             <h2 className="mt-4 mb-2 text-xl font-semibold">{t("faq.issues-q")}</h2>
             <p>
+                {/* Since this should be an actual link in the context of a larger string, the `Trans` component is required */}
                 <Trans
                     i18nKey="faq.issues"
                     components={{

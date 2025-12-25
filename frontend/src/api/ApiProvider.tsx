@@ -1,3 +1,7 @@
+/**
+ * This context provides an api that automatically handles authentication and refreshing thereof.
+ */
+
 import axios, { type AxiosInstance } from "axios";
 import { createContext, type PropsWithChildren, useContext } from "react";
 import { useTranslation } from "react-i18next";
@@ -26,6 +30,11 @@ export function ApiProvider({ children }: PropsWithChildren) {
 
     const api = createApi();
 
+    // On request and if are authenticated (i.e., have a token), check whether our access token is still valid
+    // If yes, add the authorization header, otherwise, first request a new access token via refresh
+    // Should this also fail, then we are not authenticated anymore, which may or may not be an issue for
+    // the actual request
+    // However, by default, we always try to keep our authentication valid on each request
     api.interceptors.request.use(
         async (config) => {
             if (token) {
@@ -46,6 +55,7 @@ export function ApiProvider({ children }: PropsWithChildren) {
         (error) => Promise.reject(error),
     );
 
+    // On response errors, show a special toast in case we ran into some authentication issue
     api.interceptors.response.use(
         (response) => {
             return response;

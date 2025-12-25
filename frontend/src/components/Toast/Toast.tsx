@@ -10,6 +10,9 @@ const toastColors: Record<ToastType, string> = {
     error: "bg-red-600 text-white",
 };
 
+/**
+ * This component creates a stack of toasts in the top-right of the screen, beginning with the oldest toast.
+ */
 export function ToastContainer({
     toasts,
     onClose,
@@ -28,6 +31,9 @@ export function ToastContainer({
     );
 }
 
+/**
+ * This component represents a single toast item, which is a small box with a close option.
+ */
 export function ToastItem({ toast, onClose }: { toast: Toast; onClose: (id: string) => void }) {
     return (
         <motion.div

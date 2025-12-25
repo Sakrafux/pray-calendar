@@ -10,6 +10,9 @@ const linkBaseClasses = "text-gray-600 hover:text-gray-900";
 const linkActiveClasses =
     "text-gray-900 underline underline-offset-4 underline-gray-900 decoration-2";
 
+/**
+ * This component provides a sticky navigation bar for the application, with both desktop and mobile layouts.
+ */
 function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
 
@@ -21,6 +24,7 @@ function Header() {
 
     return (
         <header className="header-height sticky top-0 z-50 bg-white px-6 py-4 shadow-md">
+            {/* Desktop layout */}
             <div className="hidden items-center justify-between md:flex">
                 <div className="flex-1 flex-shrink-0 cursor-default">
                     <h1 className="text-xl font-bold text-gray-900">{t("header.heading")}</h1>
@@ -75,6 +79,7 @@ function Header() {
                 </div>
             </div>
 
+            {/* Mobile layout */}
             <div className="flex md:hidden">
                 <div className="flex-1 flex-shrink-0 cursor-default">
                     <h1 className="text-xl font-bold text-gray-900">{t("header.heading")}</h1>

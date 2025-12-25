@@ -1,3 +1,8 @@
+/**
+ * This context handles the state concerning the calendar entries fetched from the backend and
+ * provides functionality to access it.
+ */
+
 import { AxiosError } from "axios";
 import {
     createContext,

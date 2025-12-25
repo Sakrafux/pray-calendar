@@ -8,6 +8,9 @@ import { useLoading } from "@/components/LoadingProvider";
 import { useToast } from "@/components/Toast/ToastProvider";
 import { downloadAsFile } from "@/util/file";
 
+/**
+ * This component provides the admin with various, not necessarily related admin functions.
+ */
 function Admin() {
     const { t } = useTranslation();
 
@@ -18,6 +21,7 @@ function Admin() {
             <br />
             <QueryEmails />
             <br />
+            {/* The volunteer components are hidden behind a feature flag */}
             {import.meta.env.VITE_FEATURE_VOLUNTEER_LIST === "true" ? (
                 <>
                     <QueryVolunteerEmails />
@@ -31,6 +35,10 @@ function Admin() {
     );
 }
 
+/**
+ * This component provides a small form to specify the user data, which should be deleted. This
+ * subsequently removes all future calendar entries and anonymizes all future entries.
+ */
 function DeleteUser() {
     const [formData, setFormData] = useState({
         firstName: "",
@@ -133,6 +141,13 @@ function DeleteUser() {
     );
 }
 
+/**
+ * This component provides a form for selecting the time interval from which to gather and summarize
+ * all user specific data. It fetches the data first and then handles the download on the client.
+ *
+ * The intended use case is allowing the admin to write an email to active participants, informing
+ * them of some event or information of interest.
+ */
 function QueryEmails() {
     const [formData, setFormData] = useState({
         interval: "30days",
@@ -236,6 +251,13 @@ function QueryEmails() {
     );
 }
 
+/**
+ * This component provides a button to gather the email addresses of all registered and confirmed
+ * volunteers. It fetches the data first and then handles the download on the client.
+ *
+ * Since they are definitionally the more dedicated participants, there may be some use in being able
+ * to contact them specifically.
+ */
 function QueryVolunteerEmails() {
     const { t } = useTranslation();
     const api = useApi();
@@ -282,6 +304,12 @@ function QueryVolunteerEmails() {
     );
 }
 
+/**
+ * This component provides a small form to enter the email address of a volunteer to remove him
+ * from the database and prevent further automatic notifications.
+ *
+ * This will be done on personal inquiry of a volunteer by email to the admin.
+ */
 function DeleteVolunteer() {
     const [email, setEmail] = useState("");
 
@@ -336,6 +364,10 @@ function DeleteVolunteer() {
     );
 }
 
+/**
+ * This component simply provides a button to logout the admin, removing all tokens and navigating
+ * to the home page.
+ */
 function Logout() {
     const navigate = useNavigate();
     const { t } = useTranslation();

@@ -11,6 +11,8 @@
         <div id="root"></div>
         <script type="module" src="/src/main.tsx"></script>
         <script>
+            // This creates an artificial, concrete unit (as opposed to relative like %), which means it can be used
+            // reliably to set a height based on the visible view port
             function setVh() {
                 let vh = window.innerHeight * 0.01;
                 document.documentElement.style.setProperty('--vh', `${vh}px`);

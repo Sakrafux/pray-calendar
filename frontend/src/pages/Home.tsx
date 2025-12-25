@@ -30,6 +30,7 @@ function Home() {
             <br />
             <p>{t("home.paragraph-worship")}</p>
 
+            {/* The volunteer component is hidden behind a feature flag */}
             {import.meta.env.VITE_FEATURE_VOLUNTEER_LIST === "true" ? (
                 <>
                     <h2 className="mt-8 mb-2 text-2xl font-semibold">
@@ -44,6 +45,11 @@ function Home() {
     );
 }
 
+/**
+ * This component handles the cover image on the home page.
+ * Since it may take some time to load, this component ensures a skeleton component keeps the layout
+ * in place.
+ */
 function CoverImage() {
     const [isLoaded, setIsLoaded] = useState(false);
     const [hasError, setHasError] = useState(false);
@@ -89,6 +95,11 @@ function CoverImage() {
     );
 }
 
+/**
+ * This component consists of a small email input and submit button, calling the corresponding API for
+ * registering an email address for automated messages. Since this is optional, one can voluntarily
+ * register, hence volunteer.
+ */
 function VolunteerInput() {
     const [email, setEmail] = useState("");
 

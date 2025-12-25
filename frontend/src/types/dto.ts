@@ -1,3 +1,8 @@
+/**
+ * These are types corresponding to actual business objects
+ */
+/** */
+
 export type CalendarEntryDto = {
     Id: number;
     FirstName: string;

@@ -1,3 +1,8 @@
+/**
+ * To download a file in the frontend programmatically, an anchor tag must be injected and used.
+ * For security reasons, it is often more practical to fetch the data from the backend securely and
+ * then simply create the download on the frontend, as opposed to a direct backend link.
+ */
 export const downloadAsFile = (data: string, filename: string) => {
     const blob = new Blob([data], { type: "text/csv;charset=utf-8;" });
 

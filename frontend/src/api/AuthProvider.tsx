@@ -1,3 +1,7 @@
+/**
+ * This context provides functionality to login, logout, and refresh access.
+ */
+
 import {
     createContext,
     type PropsWithChildren,
@@ -92,6 +96,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
                 };
 
                 dispatch({ type: AuthActions.RESULT, payload: data });
+                // The short-lived access token can be stored in local storage, since we need to access it readily
+                // However, the more secure refresh token is stored as a httpOnly cookie
                 localStorage.setItem("pray_calendar-auth_token", rawData);
 
                 return data;
@@ -102,6 +108,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
         [api],
     );
 
+    // Refreshing the token works using the hidden httpOnly refresh token
+    // This should be done if we get 401 during requests, as this likely means the access token ran out
     const refresh = useCallback(async () => {
         dispatch({ type: AuthActions.START });
         try {
@@ -124,6 +132,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const logout = useCallback(async () => {
         dispatch({ type: AuthActions.RESULT, payload: undefined });
 
+        // Simply removing the access token from the local storage is sufficient to log out (in addition to updating our state of course)
         localStorage.removeItem("pray_calendar-auth_token");
     }, []);
 

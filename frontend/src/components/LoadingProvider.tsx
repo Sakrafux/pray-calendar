@@ -1,3 +1,7 @@
+/**
+ * This context provides functionality to show and hide a loading screen overlay.
+ */
+
 import { motion } from "framer-motion";
 import {
     createContext,
@@ -22,6 +26,8 @@ export const LoadingProvider = ({ children }: PropsWithChildren) => {
 
     const showLoading = useCallback((ignoreDelay?: boolean) => {
         if (!delayTimer.current) {
+            // Some requests may be so fast that showing the loading screen would be more visually
+            // aggravating than the off-chance that the user may be able to click anything during that time
             delayTimer.current = setTimeout(() => setIsLoading(true), ignoreDelay ? 0 : 100);
         }
     }, []);

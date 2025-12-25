@@ -1,3 +1,8 @@
+/**
+ * These are utility types and don't represent actual business objects
+ */
+/** */
+
 export type ApiData<T> = {
     data?: T;
     loading?: boolean;

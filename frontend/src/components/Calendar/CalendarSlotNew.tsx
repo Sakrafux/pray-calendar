@@ -6,6 +6,9 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/api/AuthProvider";
 import type { CalendarEntryDto, Series } from "@/types";
 
+/**
+ * Since start and end position are the same, we define them once.
+ */
 const transitionEdge = (mobile?: boolean) => {
     const res: Variant = {};
 
@@ -24,6 +27,11 @@ const transitionEdge = (mobile?: boolean) => {
     return res;
 };
 
+/**
+ * Variants for the `motion.div`.
+ *
+ * For a more in-depth documentation, see `Calendar.tsx`.
+ */
 const variants = {
     enter: transitionEdge,
     center: (mobile?: boolean) => {
@@ -47,13 +55,19 @@ const variants = {
 };
 
 type CalendarSlotNewProps = {
+    /** Decides whether to open from the side or the bottom */
     mobile?: boolean;
     open: boolean;
+    /** Selected date and time when directly clicking on an open time slot */
     initDatetime?: { date: string; time: number };
     onClose: () => void;
     onSubmit: (entry: CalendarEntryDto, series?: Series) => Promise<boolean>;
 };
 
+/**
+ * This component provides the modal, or modal-like, form for defining and creating a new calendar
+ * entry. It has additional elements for the admin.
+ */
 function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: CalendarSlotNewProps) {
     const [formData, setFormData] = useState({
         firstName: localStorage.getItem("pray_calendar-new-firstname") ?? "",
@@ -96,6 +110,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
         const end = new Date(start);
         end.setTime(end.getTime() + timeDiff);
 
+        // Preemptively validate the input independent of the backend
         if (start.getTime() < new Date().getTime()) {
             setError(t("calendar.modal-new.error-past"));
             return;
@@ -111,6 +126,8 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
             return;
         }
 
+        // Store the user's personal data in local storage, because it is unlikely that he wants to
+        // register someone else, and this improves UX by a lot
         localStorage.setItem("pray_calendar-new-firstname", formData.firstName);
         localStorage.setItem("pray_calendar-new-lastname", formData.lastName);
         localStorage.setItem("pray_calendar-new-email", formData.email!);
@@ -148,6 +165,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
         }
     };
 
+    // Reset the data if another timeslot was clicked
     useEffect(() => {
         setFormData({
             firstName: localStorage.getItem("pray_calendar-new-firstname") ?? "",
@@ -371,6 +389,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                                         className="border p-2"
                                     >
                                         <option value=""></option>
+                                        {/* It is currently sufficient to hard code the options */}
                                         <option value="mass">
                                             {t("calendar.modal-new.admin-event-mass")}
                                         </option>

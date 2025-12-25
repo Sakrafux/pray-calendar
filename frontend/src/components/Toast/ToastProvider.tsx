@@ -1,3 +1,10 @@
+/**
+ * This context provides functionality to show (and remove) toasts, i.e., small message banners,
+ * which are commonly used to give feedback for user-caused backend requests.
+ *
+ * Toasts can be either auto-closed after a given delay or require manual closing.
+ */
+
 import {
     createContext,
     type PropsWithChildren,

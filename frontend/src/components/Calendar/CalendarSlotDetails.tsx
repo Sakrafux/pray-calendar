@@ -17,6 +17,10 @@ type CalendarSlotDetailsProps = {
     onDelete: (id: number, email: string, isSeries?: boolean) => void;
 };
 
+/**
+ * This component shows a modal with full information for a calendar entry, more so if admin, in
+ * addition to the option to delete it.
+ */
 function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsProps) {
     const [inputValue, setInputValue] = useState("");
 
@@ -73,9 +77,11 @@ function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsPr
                             {event.Email && <div>{event.Email}</div>}
                         </div>
 
-                        {event.endDate.getTime() < new Date().getTime() ||
+                        {event.endDate.getTime() < new Date().getTime() || // don't show delete option for past entries
+                        // don't show delete option if it is an admin event entry and you are not admin
                         (event.AdminEvent && !isAdmin) ? null : (
                             <div className="mt-4 flex flex-col gap-2 opacity-50 focus-within:opacity-100">
+                                {/* Enter the email used for creating the entry */}
                                 <input
                                     type="text"
                                     value={inputValue}
@@ -84,6 +90,7 @@ function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsPr
                                     placeholder={t("calendar.page.email-placeholder")}
                                 />
                                 <div className="flex gap-2">
+                                    {/* Delete the entry... */}
                                     <button
                                         onClick={() => onDelete(event.Id, inputValue)}
                                         className="flex-1 cursor-pointer bg-red-500 px-4 py-2 text-white hover:bg-red-600 active:bg-red-700"
@@ -95,6 +102,7 @@ function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsPr
                                         />
                                         {t("calendar.page.delete")}
                                     </button>
+                                    {/* ...or the entire series, if it is part of a series */}
                                     {event.SeriesId && (
                                         <button
                                             onClick={() =>

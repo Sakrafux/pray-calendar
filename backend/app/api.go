@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"time"
@@ -356,8 +357,11 @@ func (h *ApiHandler) PostVolunteerRegistration(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	// TODO send confirmation email
-	log.Println(volunteer)
+	confirmationLink := fmt.Sprintf("%s/api/volunteer/confirmation?email=%s&token=%s", os.Getenv("HOST"), email, volunteer.ConfirmationToken)
+
+	if err = sendConfirmationEmail(email, confirmationLink); err != nil {
+		httpErrorWithLog(r, w, err.Error(), http.StatusServiceUnavailable)
+	}
 
 	w.WriteHeader(http.StatusCreated)
 }

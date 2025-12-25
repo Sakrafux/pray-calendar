@@ -7,6 +7,7 @@ import (
 
 	"github.com/Sakrafux/pray-calendar/backend/app"
 	"github.com/Sakrafux/pray-calendar/backend/security"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -15,6 +16,8 @@ func main() {
 	adminName := flag.String("admin-name", "admin", "Admin name")
 	adminPassword := flag.String("admin-password", "admin", "Admin password")
 	flag.Parse()
+
+	_ = godotenv.Load()
 
 	db := app.NewDBHandler(*dbPath)
 	defer db.Close()

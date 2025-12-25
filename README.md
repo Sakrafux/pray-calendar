@@ -65,6 +65,6 @@ This makes the entire application self-contained, requiring only Docker to run.
   - https://resend.com/home
   - [x] Volunteer registration on home page
   - [x] Admin function to remove volunteer
-  - [ ] Send confirmation email to volunteer on registration
+  - [x] Send confirmation email to volunteer on registration
   - [ ] Send email on cancellation
 - [ ] Fill missing information (TODOs)

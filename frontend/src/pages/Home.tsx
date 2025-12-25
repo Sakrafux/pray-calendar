@@ -30,10 +30,16 @@ function Home() {
             <br />
             <p>{t("home.paragraph-worship")}</p>
 
-            <h2 className="mt-8 mb-2 text-2xl font-semibold">{t("home.volunteer.heading")}</h2>
-            <p>{t("home.volunteer.paragraph1")}</p>
-            <VolunteerInput />
-            <p>{t("home.volunteer.paragraph2")}</p>
+            {import.meta.env.VITE_FEATURE_VOLUNTEER_LIST === "true" ? (
+                <>
+                    <h2 className="mt-8 mb-2 text-2xl font-semibold">
+                        {t("home.volunteer.heading")}
+                    </h2>
+                    <p>{t("home.volunteer.paragraph1")}</p>
+                    <VolunteerInput />
+                    <p>{t("home.volunteer.paragraph2")}</p>
+                </>
+            ) : null}
         </main>
     );
 }

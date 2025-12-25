@@ -18,10 +18,14 @@ function Admin() {
             <br />
             <QueryEmails />
             <br />
-            <QueryVolunteerEmails />
-            <br />
-            <DeleteVolunteer />
-            <br />
+            {import.meta.env.VITE_FEATURE_VOLUNTEER_LIST === "true" ? (
+                <>
+                    <QueryVolunteerEmails />
+                    <br />
+                    <DeleteVolunteer />
+                    <br />
+                </>
+            ) : null}
             <Logout />
         </main>
     );

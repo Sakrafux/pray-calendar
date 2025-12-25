@@ -52,20 +52,26 @@ func CreateRouter(db *DBHandler, admin *security.AdminData) http.Handler {
 			r.Delete("/series/{id}", apiHandler.DeleteSeries)
 		})
 
-		router.Route("/volunteer", func(r chi.Router) {
-			r.Post("/", apiHandler.PostVolunteerRegistration)
-			r.Get("/confirmation", apiHandler.GetVolunteerConfirmation)
-		})
+		if os.Getenv("FEATURE_VOLUNTEER_LIST") == "true" {
+			router.Route("/volunteer", func(r chi.Router) {
+				r.Post("/", apiHandler.PostVolunteerRegistration)
+				r.Get("/confirmation", apiHandler.GetVolunteerConfirmation)
+			})
+		}
 
 		router.Route("/admin", func(r chi.Router) {
 			r.Post("/login", apiHandler.Login)
 			r.Group(func(r chi.Router) {
 				r.Use(AdminOnly)
+
 				r.Get("/token", apiHandler.RefreshToken)
 				r.Delete("/user", apiHandler.DeleteUserData)
 				r.Get("/emails", apiHandler.DownloadEmails)
-				r.Get("/volunteer", apiHandler.DownloadVolunteerEmails)
-				r.Delete("/volunteer", apiHandler.DeleteVolunteer)
+
+				if os.Getenv("FEATURE_VOLUNTEER_LIST") == "true" {
+					r.Get("/volunteer", apiHandler.DownloadVolunteerEmails)
+					r.Delete("/volunteer", apiHandler.DeleteVolunteer)
+				}
 			})
 		})
 	})

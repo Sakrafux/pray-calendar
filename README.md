@@ -1,7 +1,8 @@
 # Prayer Calendar Web Application
 
 This project is a **web application for organizing a prayer calendar**, designed with a minimal but powerful
-stack. It combines a **Go backend** with an **embedded database** and a **React frontend**.
+stack. It combines a **Go backend** with an **embedded database** and a **React frontend**. The business logic design
+focus lies on anonymity, allowing for organization without requiring the management of user accounts and similar.
 
 ---
 

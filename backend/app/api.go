@@ -1,3 +1,5 @@
+// Provides the API layer methods, including business logic, which is then provided by the router
+
 package app
 
 import (
@@ -16,23 +18,29 @@ import (
 	"github.com/go-chi/httplog/v2"
 )
 
+// ApiHandler serves as a service class handling the underlying database layer and providing all the API layer methods.
 type ApiHandler struct {
 	db    *DBHandler
 	admin *security.AdminData
 }
 
+// NewApiHandler is the constructor for ApiHandler.
 func NewApiHandler(db *DBHandler, admin *security.AdminData) *ApiHandler {
 	return &ApiHandler{db: db, admin: admin}
 }
 
+// GetAllEntries provides all CalendarEntry for a week starting at a date given via query parameter "start".
+// It provides CalendarEntryFull instead, if admin permissions are available.
 func (h *ApiHandler) GetAllEntries(w http.ResponseWriter, r *http.Request) {
 	start := r.URL.Query().Get("start")
+	// Parse only for date
 	startTime, err := time.Parse("2006-01-02", start)
 	if err != nil {
 		httpErrorWithLog(r, w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	// Check admin permissions from the request context
 	if r.Context().Value("admin").(bool) {
 		entries, err := h.db.GetAllFullEntriesForWeek(startTime)
 		if err != nil {
@@ -53,6 +61,7 @@ func (h *ApiHandler) GetAllEntries(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, entries)
 }
 
+// PostEntry creates a new CalendarEntryFull, which is provided via the request body. It also validates the input.
 func (h *ApiHandler) PostEntry(w http.ResponseWriter, r *http.Request) {
 	var entry CalendarEntryFull
 	err := json.NewDecoder(r.Body).Decode(&entry)
@@ -61,6 +70,7 @@ func (h *ApiHandler) PostEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate "business rules" for an entry
 	if entry.Start.Before(time.Now()) {
 		httpErrorWithLog(r, w, "Start time must be in the future", http.StatusBadRequest)
 		return
@@ -76,6 +86,7 @@ func (h *ApiHandler) PostEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// An admin event does necessarily contain no personal information
 	if entry.AdminEvent != nil {
 		entry.FirstName = ""
 		entry.LastName = ""
@@ -85,6 +96,7 @@ func (h *ApiHandler) PostEntry(w http.ResponseWriter, r *http.Request) {
 	entry.SeriesId = nil
 	insertEntry, err := h.db.InsertEntry(entry)
 	if err != nil {
+		// This issue can only reasonably occur, if the timeslot is already occupied
 		if err.Error() == "no entry inserted" {
 			httpErrorWithLog(r, w, err.Error(), http.StatusConflict)
 			return
@@ -97,6 +109,8 @@ func (h *ApiHandler) PostEntry(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+// PostSeries posts an entire Series, which implies a number of CalendarEntryFull. Therefore, it adheres to the same
+// rules as PostEntry.
 func (h *ApiHandler) PostSeries(w http.ResponseWriter, r *http.Request) {
 	var seriesReq SeriesRequest
 	err := json.NewDecoder(r.Body).Decode(&seriesReq)
@@ -126,6 +140,7 @@ func (h *ApiHandler) PostSeries(w http.ResponseWriter, r *http.Request) {
 		seriesReq.Entry.Email = ""
 	}
 
+	// Repeat the given entry according to the series parameters
 	entries := []CalendarEntryFull{seriesReq.Entry}
 	for range seriesReq.Series.Repetitions - 1 {
 		nextEntry := entries[len(entries)-1]
@@ -145,20 +160,25 @@ func (h *ApiHandler) PostSeries(w http.ResponseWriter, r *http.Request) {
 		entries = append(entries, nextEntry)
 	}
 
+	// All the newly created/repeated entries must be free of timeslot conflicts...
 	if err := h.db.CheckMultipleTimeslots(entries); err != nil {
 		httpErrorWithLog(r, w, err.Error(), http.StatusConflict)
 		return
 	}
 
+	// ...only then can we insert the series...
 	series, err := h.db.InsertSeries(seriesReq.Series)
 	if err != nil {
 		httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// ...and all its composing entries.
 	insertedEntries := make([]*CalendarEntry, len(entries))
 	for i, entry := range entries {
 		entry.SeriesId = &series.Id
+		// Some kind of bulk insert would likely be more efficient, but given the size and purpose of our application,
+		// this is not an issue
 		insertedEntries[i], err = h.db.InsertEntry(entry)
 		if err != nil {
 			httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
@@ -170,6 +190,10 @@ func (h *ApiHandler) PostSeries(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+// DeleteEntry deletes a CalendarEntry, given that the user is either admin or provided the correct email address.
+//
+// Additionally, if this entry is on short notice (<3 days), volunteers will be informed via an automated message.
+// However, this feature must be activated.
 func (h *ApiHandler) DeleteEntry(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -220,6 +244,7 @@ func (h *ApiHandler) DeleteEntry(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// DeleteSeries deletes both a Series and its associated CalendarEntry, working otherwise the same as DeleteEntry.
 func (h *ApiHandler) DeleteSeries(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -272,6 +297,7 @@ func (h *ApiHandler) DeleteSeries(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// DeleteUserData deletes all CalendarEntry associated with the given user data.
 func (h *ApiHandler) DeleteUserData(w http.ResponseWriter, r *http.Request) {
 	if !r.Context().Value("admin").(bool) {
 		httpErrorWithLog(r, w, "Forbidden", http.StatusForbidden)
@@ -290,6 +316,8 @@ func (h *ApiHandler) DeleteUserData(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// Login checks the provided credentials. On success, it provides a short-lived access token as the plain response, and
+// a long-lived refresh token via httpOnly cookie.
 func (h *ApiHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var login security.AdminData
 	err := json.NewDecoder(r.Body).Decode(&login)
@@ -306,17 +334,21 @@ func (h *ApiHandler) Login(w http.ResponseWriter, r *http.Request) {
 	refreshToken, err := security.CreateRefreshToken()
 	if err != nil {
 		httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	accessToken, err := security.CreateAccessToken()
 	if err != nil {
 		httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
+	// Set the cookie in the response
 	http.SetCookie(w, &http.Cookie{
 		Name:     "pray_calendar-refresh_token",
 		Value:    refreshToken,
 		HttpOnly: true,
 		Secure:   false,
+		// The cookie is only relevant for the refresh endpoint
 		Path:     "/api/admin/token",
 		MaxAge:   30 * 24 * 60 * 60, // 7 days
 		SameSite: http.SameSiteStrictMode,
@@ -325,6 +357,8 @@ func (h *ApiHandler) Login(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, accessToken)
 }
 
+// RefreshToken relies on the provided cookie to implicitly validate the credentials of the caller. It returns the same
+// tokens as Login.
 func (h *ApiHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("pray_calendar-refresh_token")
 	if err != nil {
@@ -363,6 +397,7 @@ func (h *ApiHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, accessToken)
 }
 
+// DownloadEmails collects all the user information implicitly present in the CalendarEntry and returns them in CSV format.
 func (h *ApiHandler) DownloadEmails(w http.ResponseWriter, r *http.Request) {
 	interval := r.URL.Query().Get("interval")
 	if interval == "" {
@@ -396,6 +431,11 @@ func (h *ApiHandler) DownloadEmails(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// PostVolunteerRegistration registers an email address for voluntary automated emails, which inform of short-notice
+// openings due to people deleting their CalendarEntry. As we can't assume the consent of the email address' owner, or
+// the email address' validity, simply by someone providing it, we send a confirmation email.
+//
+// This method should only be available behind the feature flag "FEATURE_VOLUNTEER_LIST".
 func (h *ApiHandler) PostVolunteerRegistration(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	if !isValidEmail(email) {
@@ -418,6 +458,10 @@ func (h *ApiHandler) PostVolunteerRegistration(w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusCreated)
 }
 
+// GetVolunteerConfirmation acts as counterpart to PostVolunteerRegistration, confirming a user's consent to automated
+// messages. This method is supposed to be directly accessed via a link in an email, thus it contains some simple feedback.
+//
+// This method should only be available behind the feature flag "FEATURE_VOLUNTEER_LIST".
 func (h *ApiHandler) GetVolunteerConfirmation(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	if !isValidEmail(email) {
@@ -440,6 +484,9 @@ func (h *ApiHandler) GetVolunteerConfirmation(w http.ResponseWriter, r *http.Req
 	}
 }
 
+// DeleteVolunteer removes a volunteer's email address and prevents automated messages.
+//
+// This method should only be available behind the feature flag "FEATURE_VOLUNTEER_LIST".
 func (h *ApiHandler) DeleteVolunteer(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	if !isValidEmail(email) {
@@ -456,6 +503,9 @@ func (h *ApiHandler) DeleteVolunteer(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// DownloadVolunteerEmails collects all the volunteers' email addresses and returns them in CSV format.
+//
+// This method should only be available behind the feature flag "FEATURE_VOLUNTEER_LIST".
 func (h *ApiHandler) DownloadVolunteerEmails(w http.ResponseWriter, r *http.Request) {
 	filename := "volunteer_emails.csv"
 	w.Header().Set("Content-Type", "text/csv")
@@ -489,6 +539,7 @@ func (h *ApiHandler) DownloadVolunteerEmails(w http.ResponseWriter, r *http.Requ
 	}
 }
 
+// writeJson is a utility method to simply return any struct as a JSON string
 func writeJson(w http.ResponseWriter, data any) {
 	b, err := json.Marshal(data)
 	if err != nil {
@@ -501,11 +552,13 @@ func writeJson(w http.ResponseWriter, data any) {
 	}
 }
 
+// isValidEmail is a utility method to check an email address string for proper form
 func isValidEmail(email string) bool {
 	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 	return emailRegex.MatchString(email)
 }
 
+// httpErrorWithLog is a utility method to automatically log an error before returning it to the caller
 func httpErrorWithLog(r *http.Request, w http.ResponseWriter, error string, code int) {
 	logger := httplog.LogEntry(r.Context())
 	logger.Error(error)

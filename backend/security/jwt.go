@@ -1,3 +1,5 @@
+// Provides JWT utility functions for authentication
+
 package security
 
 import (
@@ -11,6 +13,8 @@ import (
 var accessSecret = []byte(os.Getenv("ACCESS_SECRET"))
 var refreshSecret = []byte(os.Getenv("REFRESH_SECRET"))
 
+// CreateAccessToken creates an access token with very short expiry time (15 min).
+// It is supposed to be sent via header during request to authenticate admin permissions.
 func CreateAccessToken() (string, error) {
 	claims := jwt.MapClaims{
 		"exp": time.Now().Add(time.Minute * 15).Unix(),
@@ -22,6 +26,9 @@ func CreateAccessToken() (string, error) {
 	return tokenString, err
 }
 
+// CreateRefreshToken creates a refresh token with very long expiry time (30 days).
+// It is supposed to be sent via httpOnly cookie to facilitate the creation of a new access token without the need to
+// manually log in again.
 func CreateRefreshToken() (string, error) {
 	claims := jwt.MapClaims{
 		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
@@ -32,6 +39,7 @@ func CreateRefreshToken() (string, error) {
 	return token.SignedString(refreshSecret)
 }
 
+// ValidateAccessToken simply validates and extracts the contained information from a provided access token.
 func ValidateAccessToken(tokenStr string) (*jwt.Token, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -51,6 +59,7 @@ func ValidateAccessToken(tokenStr string) (*jwt.Token, error) {
 	return token, nil
 }
 
+// ValidateRefreshToken simply validates and extracts the contained information from a provided refresh token.
 func ValidateRefreshToken(tokenStr string) (*jwt.Token, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

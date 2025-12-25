@@ -1,3 +1,7 @@
+// Creates functions for interacting with the resend-SDK to send emails.
+// They are separated, because their logic is entirely dependent on the used API or SDK.
+// Additionally, a large part is simply defining the required HTML for the email body.
+
 package app
 
 import (
@@ -8,6 +12,9 @@ import (
 	"github.com/resend/resend-go/v2"
 )
 
+// sendConfirmationEmail is supposed to be used after a user registers for notifications. As we shouldn't just assume
+// that users are truthful in their input, we should confirm that it is actually their email, and they consent to
+// the notification emails. It presents the confirmation link for the user to give consent.
 func sendConfirmationEmail(email, confirmationLink string) error {
 	client := resend.NewClient(os.Getenv("RESEND_API_KEY"))
 
@@ -41,6 +48,8 @@ func sendConfirmationEmail(email, confirmationLink string) error {
 	return err
 }
 
+// sendNotificationEmail is supposed to be used if a timeslot in the near future is freed up. It informs the volunteer
+// of the timeslot that opened up and provides a direct link to the calendar page of the UI for easy access.
 func sendNotificationEmail(emails []string, start, end time.Time) error {
 	client := resend.NewClient(os.Getenv("RESEND_API_KEY"))
 

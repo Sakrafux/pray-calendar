@@ -30,6 +30,10 @@ RUN VITE_BASE=$VITE_BASE VITE_API_BASE_URL=$VITE_API_BASE_URL VITE_FEATURE_VOLUN
 # Stage 2: webserver runtime
 FROM debian:bookworm-slim as webserver
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY --from=builder-be /app/webserver .

@@ -349,7 +349,7 @@ func (h *ApiHandler) Login(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   false,
 		// The cookie is only relevant for the refresh endpoint
-		Path:     "/api/admin/token",
+		Path:     fmt.Sprintf("%s/api/admin/token", os.Getenv("PATH_PREFIX")),
 		MaxAge:   30 * 24 * 60 * 60, // 7 days
 		SameSite: http.SameSiteStrictMode,
 	})
@@ -389,7 +389,7 @@ func (h *ApiHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		Value:    refreshToken,
 		HttpOnly: true,
 		Secure:   false,
-		Path:     "/api/admin/token",
+		Path:     fmt.Sprintf("%s/api/admin/token", os.Getenv("PATH_PREFIX")),
 		MaxAge:   30 * 24 * 60 * 60, // 30 days
 		SameSite: http.SameSiteStrictMode,
 	})

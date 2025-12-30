@@ -14,6 +14,7 @@ services:
       - PORT=8080
       - HOST_BE=http://localhost:8080
       - HOST_FE=http://localhost:5173
+      - PATH_PREFIX=
       - DB_PATH=./db/data.db
       - ADMIN_NAME=admin
       - ADMIN_PASSWORD=admin

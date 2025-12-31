@@ -69,3 +69,21 @@ This makes the entire application self-contained, requiring only Docker to run.
   - [x] Send confirmation email to volunteer on registration
   - [x] Send email on cancellation
 - [ ] Fill missing information (TODOs)
+- [ ] Different colors for events
+  - Blocker - grey
+  - Messe - red
+  - Lobpreis - 
+  - Event -
+- [ ] Offer end date input for series as alternative to repetitions
+- [ ] Re-examine the layout for different resolutions
+  - centering of the text
+  - size of the image
+  - size of the text
+- [ ] Offer an English version of the website
+- [ ] Send emails on entering an entry
+  - [ ] Send the time information in the email so it can be directly entered into Google Calendar etc.
+
+## Bugs
+
+- [ ] For admin events, don't require/read-only the name/email fields
+- [ ] Entering entries as admin doesn't show you all the information, only after reload (client state issue)

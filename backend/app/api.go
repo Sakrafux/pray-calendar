@@ -222,22 +222,20 @@ func (h *ApiHandler) DeleteEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if os.Getenv("FEATURE_VOLUNTEER_LIST") == "true" {
-		emails, err := h.db.GetVolunteerEmails()
+	emails, err := h.db.GetVolunteerEmails()
+	if err != nil {
+		httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	now := time.Now()
+	threeDaysFromNow := now.AddDate(0, 0, 3)
+
+	if entry.Start.After(now) && entry.Start.Before(threeDaysFromNow) {
+		err := sendNotificationEmail(emails, entry.Start, entry.End)
 		if err != nil {
-			httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
+			httpErrorWithLog(r, w, err.Error(), http.StatusServiceUnavailable)
 			return
-		}
-
-		now := time.Now()
-		threeDaysFromNow := now.AddDate(0, 0, 3)
-
-		if entry.Start.After(now) && entry.Start.Before(threeDaysFromNow) {
-			err := sendNotificationEmail(emails, entry.Start, entry.End)
-			if err != nil {
-				httpErrorWithLog(r, w, err.Error(), http.StatusServiceUnavailable)
-				return
-			}
 		}
 	}
 
@@ -273,23 +271,21 @@ func (h *ApiHandler) DeleteSeries(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if os.Getenv("FEATURE_VOLUNTEER_LIST") == "true" {
-		emails, err := h.db.GetVolunteerEmails()
-		if err != nil {
-			httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	emails, err := h.db.GetVolunteerEmails()
+	if err != nil {
+		httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-		now := time.Now()
-		threeDaysFromNow := now.AddDate(0, 0, 3)
+	now := time.Now()
+	threeDaysFromNow := now.AddDate(0, 0, 3)
 
-		for _, entry := range entries {
-			if entry.Start.After(now) && entry.Start.Before(threeDaysFromNow) {
-				err := sendNotificationEmail(emails, entry.Start, entry.End)
-				if err != nil {
-					httpErrorWithLog(r, w, err.Error(), http.StatusServiceUnavailable)
-					return
-				}
+	for _, entry := range entries {
+		if entry.Start.After(now) && entry.Start.Before(threeDaysFromNow) {
+			err := sendNotificationEmail(emails, entry.Start, entry.End)
+			if err != nil {
+				httpErrorWithLog(r, w, err.Error(), http.StatusServiceUnavailable)
+				return
 			}
 		}
 	}
@@ -434,8 +430,6 @@ func (h *ApiHandler) DownloadEmails(w http.ResponseWriter, r *http.Request) {
 // PostVolunteerRegistration registers an email address for voluntary automated emails, which inform of short-notice
 // openings due to people deleting their CalendarEntry. As we can't assume the consent of the email address' owner, or
 // the email address' validity, simply by someone providing it, we send a confirmation email.
-//
-// This method should only be available behind the feature flag "FEATURE_VOLUNTEER_LIST".
 func (h *ApiHandler) PostVolunteerRegistration(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	if !isValidEmail(email) {
@@ -460,8 +454,6 @@ func (h *ApiHandler) PostVolunteerRegistration(w http.ResponseWriter, r *http.Re
 
 // GetVolunteerConfirmation acts as counterpart to PostVolunteerRegistration, confirming a user's consent to automated
 // messages. This method is supposed to be directly accessed via a link in an email, thus it contains some simple feedback.
-//
-// This method should only be available behind the feature flag "FEATURE_VOLUNTEER_LIST".
 func (h *ApiHandler) GetVolunteerConfirmation(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	if !isValidEmail(email) {
@@ -485,8 +477,6 @@ func (h *ApiHandler) GetVolunteerConfirmation(w http.ResponseWriter, r *http.Req
 }
 
 // DeleteVolunteer removes a volunteer's email address and prevents automated messages.
-//
-// This method should only be available behind the feature flag "FEATURE_VOLUNTEER_LIST".
 func (h *ApiHandler) DeleteVolunteer(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	if !isValidEmail(email) {
@@ -504,8 +494,6 @@ func (h *ApiHandler) DeleteVolunteer(w http.ResponseWriter, r *http.Request) {
 }
 
 // DownloadVolunteerEmails collects all the volunteers' email addresses and returns them in CSV format.
-//
-// This method should only be available behind the feature flag "FEATURE_VOLUNTEER_LIST".
 func (h *ApiHandler) DownloadVolunteerEmails(w http.ResponseWriter, r *http.Request) {
 	filename := "volunteer_emails.csv"
 	w.Header().Set("Content-Type", "text/csv")

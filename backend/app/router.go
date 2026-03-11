@@ -60,14 +60,10 @@ func CreateRouter(db *DBHandler, admin *security.AdminData) http.Handler {
 			r.Delete("/series/{id}", apiHandler.DeleteSeries)
 		})
 
-		// the volunteer list makes use of an email service, requiring additional paid services, and could thus
-		// possibly be impractical at first
-		if os.Getenv("FEATURE_VOLUNTEER_LIST") == "true" {
-			router.Route("/volunteer", func(r chi.Router) {
-				r.Post("/", apiHandler.PostVolunteerRegistration)
-				r.Get("/confirmation", apiHandler.GetVolunteerConfirmation)
-			})
-		}
+		router.Route("/volunteer", func(r chi.Router) {
+			r.Post("/", apiHandler.PostVolunteerRegistration)
+			r.Get("/confirmation", apiHandler.GetVolunteerConfirmation)
+		})
 
 		router.Route("/admin", func(r chi.Router) {
 			// as those endpoints concern logging in, they must not be behind an authentication barrier...
@@ -81,10 +77,8 @@ func CreateRouter(db *DBHandler, admin *security.AdminData) http.Handler {
 				r.Delete("/user", apiHandler.DeleteUserData)
 				r.Get("/emails", apiHandler.DownloadEmails)
 
-				if os.Getenv("FEATURE_VOLUNTEER_LIST") == "true" {
-					r.Get("/volunteer", apiHandler.DownloadVolunteerEmails)
-					r.Delete("/volunteer", apiHandler.DeleteVolunteer)
-				}
+				r.Get("/volunteer", apiHandler.DownloadVolunteerEmails)
+				r.Delete("/volunteer", apiHandler.DeleteVolunteer)
 			})
 		})
 	})

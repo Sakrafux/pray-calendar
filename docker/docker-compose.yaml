@@ -18,7 +18,6 @@ services:
       - ADMIN_NAME=admin
       - ADMIN_PASSWORD=admin
       - RESEND_API_KEY=some-api-key
-      - FEATURE_VOLUNTEER_LIST=true
     ports:
       - "8080:8080"
     volumes:

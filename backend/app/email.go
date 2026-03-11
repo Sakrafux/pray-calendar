@@ -19,10 +19,8 @@ func sendConfirmationEmail(email, confirmationLink string) error {
 	client := resend.NewClient(os.Getenv("RESEND_API_KEY"))
 
 	params := &resend.SendEmailRequest{
-		// TODO replace with real domain email
-		From: "onboarding@resend.dev",
-		// TODO replace with `email`
-		To:      []string{"andhell03@gmail.com"},
+		From:    "24/7 Anbetung St. Pölten <no-reply@send.24-7fastenzeitgebet.com>",
+		To:      []string{email},
 		Subject: "Bestätigung für Benachrichtigungen - 24/7 Anbetung St. Pölten",
 		Html: fmt.Sprintf(`
 			<div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eeeeee; border-radius: 8px;">
@@ -59,10 +57,9 @@ func sendNotificationEmail(emails []string, start, end time.Time) error {
 	endTimeStr := end.Format("15:04")
 
 	params := &resend.SendEmailRequest{
-		// TODO replace with real domain email
-		From: "onboarding@resend.dev",
-		// TODO replace with `emails`
-		To:      []string{"andhell03@gmail.com"},
+		From:    "24/7 Anbetung St. Pölten <no-reply@send.24-7fastenzeitgebet.com>",
+		To:      []string{"volunteers@24-7fastenzeitgebet.com"},
+		Bcc:     emails,
 		Subject: fmt.Sprintf("Ausfall am %s um %s-%s - 24/7 Anbetung St. Pölten", dateStr, startTimeStr, endTimeStr),
 		Html: fmt.Sprintf(`
 			<div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eeeeee; border-radius: 8px;">

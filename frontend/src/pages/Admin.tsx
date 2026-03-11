@@ -1,3 +1,4 @@
+import type { AxiosError } from "axios";
 import { type ChangeEvent, type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -21,15 +22,12 @@ function Admin() {
             <br />
             <QueryEmails />
             <br />
-            {/* The volunteer components are hidden behind a feature flag */}
-            {import.meta.env.VITE_FEATURE_VOLUNTEER_LIST === "true" ? (
-                <>
-                    <QueryVolunteerEmails />
-                    <br />
-                    <DeleteVolunteer />
-                    <br />
-                </>
-            ) : null}
+            <>
+                <QueryVolunteerEmails />
+                <br />
+                <DeleteVolunteer />
+                <br />
+            </>
             <Logout />
         </main>
     );
@@ -75,7 +73,10 @@ function DeleteUser() {
             });
             showToast("success", t("admin.userdata.success-delete"), 5000);
         } catch (error) {
-            showToast("error", `${t("admin.userdata.error-delete")}: ${(error as Error).message}`);
+            showToast(
+                "error",
+                `${t("admin.userdata.error-delete")}: ${(error as AxiosError).response?.data}`,
+            );
         }
         hideLoading();
     };
@@ -178,7 +179,7 @@ function QueryEmails() {
         } catch (error) {
             showToast(
                 "error",
-                `${t("admin.query-emails.error-query")}: ${(error as Error).message}`,
+                `${t("admin.query-emails.error-query")}: ${(error as AxiosError).response?.data}`,
             );
         }
         hideLoading();
@@ -275,7 +276,7 @@ function QueryVolunteerEmails() {
         } catch (error) {
             showToast(
                 "error",
-                `${t("admin.query-volunteer-emails.error-query")}: ${(error as Error).message}`,
+                `${t("admin.query-volunteer-emails.error-query")}: ${(error as AxiosError).response?.data}`,
             );
         }
         hideLoading();
@@ -327,7 +328,10 @@ function DeleteVolunteer() {
             setEmail("");
             showToast("success", t("admin.volunteer.success-delete"), 5000);
         } catch (error) {
-            showToast("error", `${t("admin.volunteer.error-delete")}: ${(error as Error).message}`);
+            showToast(
+                "error",
+                `${t("admin.volunteer.error-delete")}: ${(error as AxiosError).response?.data}`,
+            );
         }
         hideLoading();
     };

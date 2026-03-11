@@ -4,7 +4,7 @@ function Impressum() {
     const { t } = useTranslation();
 
     return (
-        <main className="text-container p-4">
+        <main className="text-container">
             <h1 className="mb-6 text-2xl font-bold">{t("impressum.heading")}</h1>
 
             <h2 className="mb-2 text-xl font-semibold">{t("impressum.name-heading")}</h2>

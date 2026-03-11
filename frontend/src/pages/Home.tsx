@@ -1,3 +1,4 @@
+import type { AxiosError } from "axios";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
@@ -10,7 +11,7 @@ function Home() {
     const { t } = useTranslation();
 
     return (
-        <main className="text-container p-4">
+        <main className="text-container">
             <CoverImage />
 
             <h1 className="mt-6 text-center text-4xl font-extrabold md:mt-8 md:text-6xl">
@@ -30,17 +31,12 @@ function Home() {
             <br />
             <p>{t("home.paragraph-worship")}</p>
 
-            {/* The volunteer component is hidden behind a feature flag */}
-            {import.meta.env.VITE_FEATURE_VOLUNTEER_LIST === "true" ? (
-                <>
-                    <h2 className="mt-8 mb-2 text-2xl font-semibold">
-                        {t("home.volunteer.heading")}
-                    </h2>
-                    <p>{t("home.volunteer.paragraph1")}</p>
-                    <VolunteerInput />
-                    <p>{t("home.volunteer.paragraph2")}</p>
-                </>
-            ) : null}
+            <>
+                <h2 className="mt-8 mb-2 text-2xl font-semibold">{t("home.volunteer.heading")}</h2>
+                <p>{t("home.volunteer.paragraph1")}</p>
+                <VolunteerInput />
+                <p>{t("home.volunteer.paragraph2")}</p>
+            </>
         </main>
     );
 }
@@ -117,7 +113,10 @@ function VolunteerInput() {
             setEmail("");
             showToast("success", t("home.volunteer.success-post"), 5000);
         } catch (error) {
-            showToast("error", `${t("home.volunteer.error-post")}: ${(error as Error).message}`);
+            showToast(
+                "error",
+                `${t("home.volunteer.error-post")}: ${(error as AxiosError).response?.data}`,
+            );
         }
         hideLoading();
     };

@@ -11,6 +11,14 @@ for (let h = 0; h < 24; h++) {
     slots.push({ hour: h });
 }
 
+// Due to the small scale of the app, the event types are hard coded
+const eventColorCss: Record<string, string> = {
+    mass: "bg-red-500 hover:bg-red-600 active:bg-red-600",
+    praise: "bg-purple-500 hover:bg-purple-600 active:bg-purple-700",
+    event: "bg-green-400 hover:bg-green-500 active:bg-green-600",
+    blocker: "bg-slate-400 hover:bg-slate-500 active:bg-slate-600",
+};
+
 type CalendarSlotsProps = {
     startOfWeek: Date;
     days: Date[];
@@ -58,11 +66,14 @@ function CalendarSlots({ startOfWeek, days, onSlotClick }: CalendarSlotsProps) {
 
                         let eventDiv = null;
                         if (event) {
-                            const color = event.AdminEvent
-                                ? "bg-black"
-                                : event.SeriesId != null
-                                  ? "bg-orange-500 hover:bg-orange-600 active:bg-orange-700"
-                                  : "bg-blue-500 hover:bg-blue-600 active:bg-blue-700";
+                            let color;
+                            if (event.AdminEvent) {
+                                color = eventColorCss[event.AdminEvent] ?? "bg-black";
+                            } else if (event.SeriesId != null) {
+                                color = "bg-orange-500 hover:bg-orange-600 active:bg-orange-700";
+                            } else {
+                                color = "bg-blue-500 hover:bg-blue-600 active:bg-blue-700";
+                            }
 
                             // We presuppose that only our approved events can and will be entered, as they have corresponding strings
                             const eventName = event.AdminEvent

@@ -54,13 +54,13 @@ function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsPr
                         </button>
 
                         <h2 className="mb-4 text-xl font-semibold">
-                            <div>
-                                {t("calendar.page.from")} {formatIsoDateString(event.Start)}{" "}
-                                {event.Start.slice(11, 16)}
-                            </div>
-                            <div>
-                                {t("calendar.page.to")} {formatIsoDateString(event.End)}{" "}
-                                {event.End.slice(11, 16)}
+                            <div className="grid grid-cols-[max-content_max-content_max-content] gap-x-2">
+                                <span>{t("calendar.page.from")}</span>
+                                <span>{formatIsoDateString(event.Start)}</span>
+                                <span>{event.Start.slice(11, 16)}</span>
+                                <span>{t("calendar.page.to")}</span>
+                                <span>{formatIsoDateString(event.End)}</span>
+                                <span>{event.End.slice(11, 16)}</span>
                             </div>
                         </h2>
 

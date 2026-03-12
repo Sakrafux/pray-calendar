@@ -69,11 +69,11 @@ This makes the entire application self-contained, requiring only Docker to run.
   - [x] Send confirmation email to volunteer on registration
   - [x] Send email on cancellation
 - [ ] Fill missing information (TODOs)
-- [ ] Different colors for events
+- [x] Different colors for events
   - Blocker - grey
   - Messe - red
-  - Lobpreis - 
-  - Event -
+  - Lobpreis - purple
+  - Event - green
 - [ ] Offer end date input for series as alternative to repetitions
 - [ ] Re-examine the layout for different resolutions
   - centering of the text

@@ -3,7 +3,7 @@ export function startOfWeek(date: Date): Date {
     const day = d.getDay(); // 0 = Sunday
     const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust if Sunday
     d.setDate(diff);
-    d.setHours(d.getTimezoneOffset() / -60, 0, 0, 0);
+    d.setHours(12, 0, 0, 0);
     return d;
 }
 

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"time"
 
@@ -104,6 +105,27 @@ func (h *ApiHandler) PostEntry(w http.ResponseWriter, r *http.Request) {
 		httpErrorWithLog(r, w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// Since sending the email is irrelevant the overall request, do this asynchronously
+	go func() {
+		logger := httplog.LogEntry(r.Context())
+
+		// Query the volunteer emails...
+		volunteerEmails, err := h.db.GetVolunteerEmails()
+		if err != nil {
+			logger.Warn(err.Error())
+			return
+		}
+
+		// ...to check whether the user agreed to receive confirmation emails
+		if slices.Contains(volunteerEmails, entry.Email) {
+			err := sendEntryConfirmationEmail(entry.Email, entry.Start, entry.End)
+			// Only log issues and no status code, because core functionality works fine
+			if err != nil {
+				logger.Warn("Failed to send email confirmation for email " + entry.Email + " with error: " + err.Error())
+			}
+		}
+	}()
 
 	// While we theoretically expose more information than a non-admin would be allowed to receive,
 	// they would only receive it for their own POST input, which they know anyway

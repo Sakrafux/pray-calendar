@@ -54,6 +54,13 @@ This makes the entire application self-contained, requiring only Docker to run.
 
 ---
 
+## Notes
+
+- Because I was not careful regarding dates, everything is technically handled as UTC, which is largely no issue, 
+since this project only deals with a single timezone, but it needs to be kept in mind that it may cause issues
+
+---
+
 ## TODOs
 
 - [x] Finish FAQ
@@ -80,8 +87,11 @@ This makes the entire application self-contained, requiring only Docker to run.
   - size of the image
   - size of the text
 - [ ] Offer an English version of the website
-- [ ] Send emails on entering an entry
-  - [ ] Send the time information in the email so it can be directly entered into Google Calendar etc.
+  - [ ] Also offer English notifications on signup
+- [x] Send emails on entering an entry
+  - slight adaption, only send to volunteers, because otherwise emails could be misused
+  - [x] Send the time information in the email so it can be directly entered into Google Calendar etc.
+- [ ] For E-Mail confirmation (`GetVolunteerConfirmation`) add better html or maybe reroute to special page in frontend
 
 ## Bugs
 

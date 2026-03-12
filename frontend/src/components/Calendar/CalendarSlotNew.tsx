@@ -208,6 +208,8 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
             FirstName: formData.firstName,
             LastName: formData.lastName,
             Email: formData.email,
+            // Careful here, I remove the timezone because the backend parser parses with UTC timezone,
+            // so I am dealing only in UTC timezone dates that represent my current timezone
             Start: new Date(start.getTime() - start.getTimezoneOffset() * 60 * 1000).toISOString(),
             End: new Date(end.getTime() - end.getTimezoneOffset() * 60 * 1000).toISOString(),
             SeriesId: -1,
@@ -391,7 +393,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                         </div>
 
                         <div className="mt-3">
-                            <label className="flex items-center gap-2">
+                            <label className="flex w-fit items-center gap-2">
                                 <input
                                     type="checkbox"
                                     name="series"

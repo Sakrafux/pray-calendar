@@ -34,8 +34,9 @@ function Home() {
             <>
                 <h2 className="mt-8 mb-2 text-2xl font-semibold">{t("home.volunteer.heading")}</h2>
                 <p>{t("home.volunteer.paragraph1")}</p>
-                <VolunteerInput />
                 <p>{t("home.volunteer.paragraph2")}</p>
+                <VolunteerInput />
+                <p>{t("home.volunteer.paragraph3")}</p>
             </>
         </main>
     );

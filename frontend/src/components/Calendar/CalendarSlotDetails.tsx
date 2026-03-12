@@ -80,15 +80,17 @@ function CalendarSlotDetails({ onClose, event, onDelete }: CalendarSlotDetailsPr
                         {event.endDate.getTime() < new Date().getTime() || // don't show delete option for past entries
                         // don't show delete option if it is an admin event entry and you are not admin
                         (event.AdminEvent && !isAdmin) ? null : (
-                            <div className="mt-4 flex flex-col gap-2 opacity-50 focus-within:opacity-100">
+                            <div className="mt-4 flex flex-col gap-2 opacity-50 focus-within:opacity-100 hover:opacity-100">
                                 {/* Enter the email used for creating the entry */}
-                                <input
-                                    type="text"
-                                    value={inputValue}
-                                    onChange={(e) => setInputValue(e.target.value)}
-                                    className="flex-1 border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                                    placeholder={t("calendar.page.email-placeholder")}
-                                />
+                                {event.AdminEvent ? null : (
+                                    <input
+                                        type="text"
+                                        value={inputValue}
+                                        onChange={(e) => setInputValue(e.target.value)}
+                                        className="flex-1 border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                        placeholder={t("calendar.page.email-placeholder")}
+                                    />
+                                )}
                                 <div className="flex gap-2">
                                     {/* Delete the entry... */}
                                     <button

@@ -16,6 +16,10 @@
         @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4 pb-20 lg:pb-40;
     }
 
+    .read-only-input {
+        @apply read-only:pointer-events-none read-only:cursor-default read-only:opacity-50;
+    }
+
     .header-height {
         height: var(--header-height);
     }

@@ -85,5 +85,5 @@ This makes the entire application self-contained, requiring only Docker to run.
 
 ## Bugs
 
-- [ ] For admin events, don't require/read-only the name/email fields
-- [ ] Entering entries as admin doesn't show you all the information, only after reload (client state issue)
+- [x] For admin events, don't require/read-only the name/email fields
+- [x] Entering entries as admin doesn't show you all the information, only after reload (client state issue)

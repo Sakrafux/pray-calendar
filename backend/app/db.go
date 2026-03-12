@@ -135,7 +135,7 @@ func (h *DBHandler) GetAllFullEntriesForWeek(start time.Time) ([]CalendarEntryFu
 
 // InsertEntry inserts a new CalendarEntryFull, i.e., information entered by a user, into the database, given that it
 // does not conflict with the existing data.
-func (h *DBHandler) InsertEntry(entry CalendarEntryFull) (*CalendarEntry, error) {
+func (h *DBHandler) InsertEntry(entry CalendarEntryFull) (*CalendarEntryFull, error) {
 	res, err := h.db.Exec(`
 		INSERT INTO calendar_entries (firstname, lastname, email, starttime, endtime, admin_event, series_id) 
 		SELECT $1, $2, $3, $4, $5, $6, $7
@@ -157,15 +157,10 @@ func (h *DBHandler) InsertEntry(entry CalendarEntryFull) (*CalendarEntry, error)
 		return nil, err
 	}
 
-	// Immediately query the newly added data, now complete with id
-	var newEntry CalendarEntry
-	err = h.db.QueryRow("SELECT id, firstname, starttime, endtime, admin_event, series_id FROM calendar_entries WHERE id = $1", id).Scan(
-		&newEntry.Id, &newEntry.FirstName, &newEntry.Start, &newEntry.End, &newEntry.AdminEvent, &newEntry.SeriesId)
-	if err != nil {
-		return nil, err
-	}
+	// If the insert succeeded, we know that the only new relevant fact consists of the created ID
+	entry.Id = int(id)
 
-	return &newEntry, nil
+	return &entry, nil
 }
 
 // CheckMultipleTimeslots checks whether any of the provided CalendarEntryFull conflicts with existing data.

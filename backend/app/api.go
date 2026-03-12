@@ -105,6 +105,8 @@ func (h *ApiHandler) PostEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// While we theoretically expose more information than a non-admin would be allowed to receive,
+	// they would only receive it for their own POST input, which they know anyway
 	writeJson(w, insertEntry)
 	w.WriteHeader(http.StatusCreated)
 }
@@ -174,7 +176,7 @@ func (h *ApiHandler) PostSeries(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// ...and all its composing entries.
-	insertedEntries := make([]*CalendarEntry, len(entries))
+	insertedEntries := make([]*CalendarEntryFull, len(entries))
 	for i, entry := range entries {
 		entry.SeriesId = &series.Id
 		// Some kind of bulk insert would likely be more efficient, but given the size and purpose of our application,
@@ -186,6 +188,8 @@ func (h *ApiHandler) PostSeries(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// While we theoretically expose more information than a non-admin would be allowed to receive,
+	// they would only receive it for their own POST input, which they know anyway
 	writeJson(w, insertedEntries)
 	w.WriteHeader(http.StatusCreated)
 }

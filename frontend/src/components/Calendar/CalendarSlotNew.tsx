@@ -85,6 +85,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
     const [error, setError] = useState("");
 
     const hours = Array.from({ length: 25 }, (_, i) => i); // 0–24
+    const isAdminEvent = formData.adminEvent !== "";
 
     const {
         state: { data: isAdmin },
@@ -220,8 +221,9 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                                 name="firstName"
                                 value={formData.firstName}
                                 onChange={handleChange}
-                                className="mt-1 w-full border p-2 focus:ring-2 focus:ring-blue-500"
-                                required
+                                className="read-only-input mt-1 w-full border p-2 focus:ring-2 focus:ring-blue-500"
+                                required={!isAdminEvent}
+                                readOnly={isAdminEvent}
                             />
                         </div>
 
@@ -234,8 +236,9 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                                 name="lastName"
                                 value={formData.lastName}
                                 onChange={handleChange}
-                                className="mt-1 w-full border p-2 focus:ring-2 focus:ring-blue-500"
-                                required
+                                className="read-only-input mt-1 w-full border p-2 focus:ring-2 focus:ring-blue-500"
+                                required={!isAdminEvent}
+                                readOnly={isAdminEvent}
                             />
                         </div>
 
@@ -248,8 +251,9 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="mt-1 w-full border p-2 focus:ring-2 focus:ring-blue-500"
-                                required
+                                className="read-only-input mt-1 w-full border p-2 focus:ring-2 focus:ring-blue-500"
+                                required={!isAdminEvent}
+                                readOnly={isAdminEvent}
                             />
                         </div>
 

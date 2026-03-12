@@ -74,7 +74,7 @@ This makes the entire application self-contained, requiring only Docker to run.
   - Messe - red
   - Lobpreis - purple
   - Event - green
-- [ ] Offer end date input for series as alternative to repetitions
+- [x] Offer end date input for series as alternative to repetitions
 - [ ] Re-examine the layout for different resolutions
   - centering of the text
   - size of the image

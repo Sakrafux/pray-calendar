@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { AnimatePresence, motion, type Variant } from "framer-motion";
 import { Minus, X } from "lucide-react";
 import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
@@ -5,6 +6,12 @@ import { useTranslation } from "react-i18next";
 
 import { useAuth } from "@/api/AuthProvider";
 import type { CalendarEntryDto, Series } from "@/types";
+
+const recurrenceToDayjs: Record<string, dayjs.ManipulateType> = {
+    daily: "day",
+    weekly: "week",
+    monthly: "month",
+};
 
 /**
  * Since start and end position are the same, we define them once.
@@ -81,6 +88,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
         // "daily" | "weekly" | "monthly"
         recurrence: "weekly",
         repetitions: 1,
+        seriesEndDate: "",
     });
     const [error, setError] = useState("");
 
@@ -97,6 +105,68 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
         setFormData((prev) => ({
             ...prev,
             [name]: type === "checkbox" ? e.target.checked : value,
+        }));
+    };
+
+    const handleRepetitionsChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { value } = e.target;
+        const repetitions = Number(value);
+
+        let seriesEndDate = "";
+        if (formData.date) {
+            seriesEndDate = dayjs(formData.date)
+                .add(repetitions, recurrenceToDayjs[formData.recurrence])
+                .add(12, "hours")
+                .toISOString()
+                .split("T")[0];
+        }
+
+        setFormData((prev) => ({
+            ...prev,
+            repetitions,
+            seriesEndDate,
+        }));
+    };
+
+    const handleRecurrenceChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { value } = e.target;
+
+        let seriesEndDate = "";
+        if (formData.date) {
+            seriesEndDate = dayjs(formData.date)
+                .add(formData.repetitions, recurrenceToDayjs[value])
+                .add(12, "hours")
+                .toISOString()
+                .split("T")[0];
+        }
+
+        setFormData((prev) => ({
+            ...prev,
+            recurrence: value,
+            seriesEndDate,
+        }));
+    };
+
+    const handleSeriesEndDateChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { value } = e.target;
+
+        const startDate = dayjs(formData.date);
+        const endDate = dayjs(value);
+
+        const diffRepetitions = Math.min(
+            10,
+            Math.max(1, endDate.diff(startDate, recurrenceToDayjs[formData.recurrence])),
+        );
+        const expectedEndDate = dayjs(formData.date)
+            .add(diffRepetitions, recurrenceToDayjs[formData.recurrence])
+            .add(12, "hours")
+            .toISOString()
+            .split("T")[0];
+
+        setFormData((prev) => ({
+            ...prev,
+            repetitions: diffRepetitions,
+            seriesEndDate: expectedEndDate,
         }));
     };
 
@@ -146,7 +216,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
         const series: Series | undefined = formData.series
             ? {
                   Interval: formData.recurrence,
-                  Repetitions: Number(formData.repetitions),
+                  Repetitions: formData.repetitions,
               }
             : undefined;
         if (await onSubmit(dto, series)) {
@@ -161,6 +231,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                 adminEvent: "",
                 recurrence: "weekly",
                 repetitions: 1,
+                seriesEndDate: "",
             });
             setError("");
         }
@@ -168,6 +239,15 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
 
     // Reset the data if another timeslot was clicked
     useEffect(() => {
+        let seriesEndDate = "";
+        if (initDatetime?.date) {
+            seriesEndDate = dayjs(initDatetime.date)
+                .add(1, "week")
+                .add(12, "hours")
+                .toISOString()
+                .split("T")[0];
+        }
+
         setFormData({
             firstName: localStorage.getItem("pray_calendar-new-firstname") ?? "",
             lastName: localStorage.getItem("pray_calendar-new-lastname") ?? "",
@@ -181,6 +261,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
             adminEvent: "",
             recurrence: "weekly",
             repetitions: 1,
+            seriesEndDate: seriesEndDate ?? "",
         });
     }, [initDatetime]);
 
@@ -335,7 +416,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                                                     name="recurrence"
                                                     value="daily"
                                                     checked={formData.recurrence === "daily"}
-                                                    onChange={handleChange}
+                                                    onChange={handleRecurrenceChange}
                                                 />
                                                 {t("calendar.modal-new.recurrence-daily")}
                                             </label>
@@ -345,7 +426,7 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                                                     name="recurrence"
                                                     value="weekly"
                                                     checked={formData.recurrence === "weekly"}
-                                                    onChange={handleChange}
+                                                    onChange={handleRecurrenceChange}
                                                 />
                                                 {t("calendar.modal-new.recurrence-weekly")}
                                             </label>
@@ -355,26 +436,45 @@ function CalendarSlotNew({ mobile, open, initDatetime, onClose, onSubmit }: Cale
                                                     name="recurrence"
                                                     value="monthly"
                                                     checked={formData.recurrence === "monthly"}
-                                                    onChange={handleChange}
+                                                    onChange={handleRecurrenceChange}
                                                 />
                                                 {t("calendar.modal-new.recurrence-monthly")}
                                             </label>
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium">
-                                            {t("calendar.modal-new.repetitions")}
-                                        </label>
-                                        <input
-                                            type="number"
-                                            name="repetitions"
-                                            value={formData.repetitions}
-                                            onChange={handleChange}
-                                            min={1}
-                                            max={100}
-                                            className="mt-1 w-24 border p-2"
-                                        />
+                                    <div className="flex gap-2">
+                                        <div className="flex-1/3">
+                                            <label className="block text-sm font-medium">
+                                                {t("calendar.modal-new.repetitions")}
+                                            </label>
+                                            <div className="mt-1 flex gap-2">
+                                                <input
+                                                    type="number"
+                                                    name="repetitions"
+                                                    value={formData.repetitions}
+                                                    onChange={handleRepetitionsChange}
+                                                    min={1}
+                                                    max={10}
+                                                    className="flex-1 border p-2"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex-2/3">
+                                            <label className="block text-sm font-medium">
+                                                {t("calendar.modal-new.startdate")}
+                                            </label>
+                                            <div className="mt-1 flex gap-2">
+                                                <input
+                                                    type="date"
+                                                    name="date"
+                                                    min={new Date().toISOString().split("T")[0]}
+                                                    value={formData.seriesEndDate}
+                                                    onChange={handleSeriesEndDateChange}
+                                                    className="flex-1 border p-2"
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )}
